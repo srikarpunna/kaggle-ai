@@ -1,0 +1,93 @@
+# ElderCare Agent - External Agents Registry
+# Registry of external agents in the A2A network
+
+agents:
+  pharmacy_cvs:
+    name: "CVS Pharmacy Agent"
+    type: "pharmacy"
+    url: "https://api.cvs.com/agent/v1"
+    capabilities:
+      - medication_refill
+      - medication_price_check
+      - medication_delivery
+    active: true
+    description: "CVS Pharmacy automated agent for medication management"
+
+  pharmacy_walgreens:
+    name: "Walgreens Pharmacy Agent"
+    type: "pharmacy"
+    url: "https://api.walgreens.com/agent/v1"
+    capabilities:
+      - medication_refill
+      - medication_price_check
+      - medication_delivery
+    active: true
+    description: "Walgreens Pharmacy automated agent"
+
+  doctor_office_primary:
+    name: "Dr. Smith's Office Agent"
+    type: "doctor_office"
+    url: "https://api.drsmith.com/agent/v1"
+    capabilities:
+      - appointment_schedule
+      - appointment_reschedule
+      - appointment_cancel
+      - medical_records
+    active: true
+    description: "Primary care physician office automated scheduling"
+
+  doctor_office_specialist:
+    name: "Cardiology Specialists Agent"
+    type: "doctor_office"
+    url: "https://api.cardio-specialists.com/agent/v1"
+    capabilities:
+      - appointment_schedule
+      - appointment_reschedule
+      - appointment_cancel
+    active: true
+    description: "Cardiology specialist office scheduling"
+
+  emergency_services:
+    name: "Emergency Services Agent"
+    type: "emergency"
+    url: "tel:911"
+    capabilities:
+      - emergency_call
+      - family_notification
+    active: true
+    description: "Emergency services coordination and family notification"
+
+  family_notification:
+    name: "Family Alert Agent"
+    type: "notification"
+    url: "https://api.eldercare.com/family-notify/v1"
+    capabilities:
+      - family_notification
+    active: true
+    description: "Automated family member notification system"
+
+  insurance_provider:
+    name: "Medicare Agent"
+    type: "insurance"
+    url: "https://api.medicare.gov/agent/v1"
+    capabilities:
+      - medication_price_check
+    active: false  # Not implemented yet
+    description: "Medicare insurance coverage and pricing information"
+
+# A2A Protocol Configuration
+protocol_config:
+  version: "1.0"
+  timeout_seconds: 30
+  max_retries: 3
+  require_authentication: true
+  encryption: true
+
+# Security settings
+security:
+  require_api_key: true
+  use_tls: true
+  verify_certificates: true
+  allowed_origins:
+    - "https://eldercare-agent.run.app"
+    - "http://localhost:5000"
