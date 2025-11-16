@@ -88,6 +88,7 @@ class CommunicationAgent:
 
         # Use Gemini to match the query to a contact
         prompt = get_config().get_prompt(
+            "system",
             "communication",
             "contact_retrieval",
             user_message=query,
@@ -201,6 +202,7 @@ class CommunicationAgent:
 
             # Generate confirmation message
             confirmation_prompt = get_config().get_prompt(
+                "system",
                 "communication",
                 "confirmation",
                 contact_name=contact["contact_name"],

@@ -7,7 +7,7 @@ google-generativeai>=0.7.0
 pyyaml>=6.0.1
 
 # Web framework
-flask>=3.0.0
+flask[async]>=3.0.0
 flask-cors>=4.0.0
 
 # Google Calendar API
@@ -17,10 +17,10 @@ google-auth-httplib2>=0.1.1
 google-api-python-client>=2.100.0
 
 # Database
-sqlite3  # Built-in with Python
+# sqlite3 - Built-in with Python, no need to install
 
 # MCP (Model Context Protocol)
-mcp>=0.1.0
+# mcp>=0.1.0 - Will implement custom MCP servers
 
 # HTTP requests
 requests>=2.31.0

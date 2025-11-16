@@ -127,6 +127,7 @@ class HealthAgent:
             Reminder message
         """
         prompt = get_config().get_prompt(
+            "system",
             "health",
             "medication_reminder_message",
             medication_name=medication["medication_name"],
@@ -274,6 +275,7 @@ class HealthAgent:
 
         # Use Gemini to determine what the user wants
         prompt = get_config().get_prompt(
+            "system",
             "health",
             "medication_check",
             user_message=user_message,

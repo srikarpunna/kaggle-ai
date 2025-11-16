@@ -227,13 +227,13 @@ class ConfigLoader:
             raise KeyError(f"Task configuration not found: {task_id}")
         return self.tasks[task_id]
 
-    def get_prompt(self, category: str, prompt_id: str, **kwargs) -> str:
+    def get_prompt(self, category: str, *path, **kwargs) -> str:
         """
         Get a prompt template and format it with provided kwargs.
 
         Args:
             category: Prompt category (system, tasks, errors, conversation, multi_turn)
-            prompt_id: Specific prompt ID within the category
+            *path: One or more path components to navigate nested prompts
             **kwargs: Variables to format the prompt with
 
         Returns:
@@ -242,10 +242,20 @@ class ConfigLoader:
         if category not in self.prompts:
             raise KeyError(f"Prompt category not found: {category}")
 
-        if prompt_id not in self.prompts[category]:
-            raise KeyError(f"Prompt not found: {category}.{prompt_id}")
+        # Navigate through nested structure
+        template = self.prompts[category]
+        full_path = [category] + list(path)
+        
+        for i, key in enumerate(path):
+            if isinstance(template, dict):
+                if key not in template:
+                    raise KeyError(f"Prompt not found: {'.'.join(full_path[:i+2])}")
+                template = template[key]
+            else:
+                raise KeyError(f"Cannot navigate deeper: {'.'.join(full_path[:i+1])} is not a dict")
 
-        template = self.prompts[category][prompt_id]
+        if not isinstance(template, str):
+            raise KeyError(f"Prompt path {'.'.join(full_path)} does not point to a string template")
 
         # Format the template with provided kwargs
         try:

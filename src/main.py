@@ -168,8 +168,12 @@ class ElderCareAgent:
             intent = intent_result.get("intent")
             entities = intent_result.get("entities", {})
             confidence = intent_result.get("confidence", 0.0)
-
+            
+            # Log full intent result for debugging
             logger.info(f"  Intent: {intent} (confidence: {confidence})")
+            if "error" in intent_result:
+                logger.error(f"  Intent classification error: {intent_result['error']}")
+            logger.debug(f"  Full intent result: {intent_result}")
 
             # Step 2: Route to appropriate agent
             logger.info("Step 2: Routing to specialist agent...")

@@ -96,14 +96,23 @@ async def process_message():
 
         # Process message
         response = await agent.process_message(user_message)
+        
+        # Add debug info in development
+        if os.getenv('FLASK_DEBUG', 'False').lower() == 'true':
+            response['_debug'] = {
+                'user_message': user_message,
+                'response_keys': list(response.keys())
+            }
 
         return jsonify(response), 200
 
     except Exception as e:
         logger.error(f"Error processing message: {e}", exc_info=True)
+        import traceback
         return jsonify({
             'success': False,
             'error': str(e),
+            'traceback': traceback.format_exc(),
             'message': "I'm sorry, I encountered an error. Please try again."
         }), 500
 
@@ -164,6 +173,25 @@ def health_check():
     }), 200
 
 
+@app.route('/api/debug', methods=['GET'])
+def debug_info():
+    """Debug endpoint to check agent initialization."""
+    try:
+        import os
+        api_key = os.getenv("GEMINI_API_KEY")
+        return jsonify({
+            'api_key_configured': bool(api_key),
+            'api_key_length': len(api_key) if api_key else 0,
+            'agent_instances': len(agent_instances),
+            'status': 'debug_info'
+        }), 200
+    except Exception as e:
+        return jsonify({
+            'error': str(e),
+            'status': 'error'
+        }), 500
+
+
 @app.errorhandler(404)
 def not_found(error):
     """404 error handler."""
@@ -183,17 +211,7 @@ def internal_error(error):
     }), 500
 
 
-# Run the async route handler
-def async_route(f):
-    """Decorator to handle async routes."""
-    def wrapper(*args, **kwargs):
-        return asyncio.run(f(*args, **kwargs))
-    wrapper.__name__ = f.__name__
-    return wrapper
-
-
-# Apply async decorator to routes that need it
-app.add_url_rule('/api/message', 'process_message', async_route(process_message), methods=['POST'])
+# Note: async routes are handled by Flask's native async support in Flask 2.0+
 
 
 if __name__ == '__main__':
