@@ -38,6 +38,7 @@ class SessionManager:
             "context": initial_context or {},
             "conversation_history": [],
             "current_task": None,
+            "pending_action": None,  # For actions awaiting confirmation
             "active": True
         }
 
@@ -143,6 +144,58 @@ class SessionManager:
 
         self.sessions[session_id]["current_task"] = None
         self.sessions[session_id]["last_active"] = datetime.now().isoformat()
+        return True
+
+    def set_pending_action(self, session_id: str, action: Dict[str, Any]) -> bool:
+        """
+        Set a pending action awaiting user confirmation.
+
+        Args:
+            session_id: Session ID
+            action: Action dict with type, data, and confirmation message
+
+        Returns:
+            True if successful
+        """
+        if session_id not in self.sessions:
+            return False
+
+        self.sessions[session_id]["pending_action"] = action
+        self.sessions[session_id]["last_active"] = datetime.now().isoformat()
+        logger.debug(f"Set pending action for session {session_id}: {action.get('type')}")
+        return True
+
+    def get_pending_action(self, session_id: str) -> Optional[Dict[str, Any]]:
+        """
+        Get pending action if one exists.
+
+        Args:
+            session_id: Session ID
+
+        Returns:
+            Pending action dict or None
+        """
+        if session_id not in self.sessions:
+            return None
+
+        return self.sessions[session_id].get("pending_action")
+
+    def clear_pending_action(self, session_id: str) -> bool:
+        """
+        Clear pending action after confirmation/cancellation.
+
+        Args:
+            session_id: Session ID
+
+        Returns:
+            True if successful
+        """
+        if session_id not in self.sessions:
+            return False
+
+        self.sessions[session_id]["pending_action"] = None
+        self.sessions[session_id]["last_active"] = datetime.now().isoformat()
+        logger.debug(f"Cleared pending action for session {session_id}")
         return True
 
     def end_session(self, session_id: str) -> bool:

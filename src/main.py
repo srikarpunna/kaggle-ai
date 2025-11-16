@@ -115,6 +115,52 @@ class ElderCareAgent:
         )
 
         try:
+            # CRITICAL: Check if we have a pending action awaiting confirmation
+            pending_action = self.session_manager.get_pending_action(self.current_session_id)
+
+            if pending_action:
+                logger.info(f"Found pending action: {pending_action.get('type')}")
+                # Check if user is confirming or canceling
+                is_confirmation = self._is_confirmation(user_message)
+                is_cancellation = self._is_cancellation(user_message)
+
+                if is_confirmation:
+                    logger.info("User confirmed pending action")
+                    # Execute the pending action
+                    response = await self._execute_pending_action(pending_action)
+                    # Clear pending action
+                    self.session_manager.clear_pending_action(self.current_session_id)
+                    # Add to conversation and log
+                    self.session_manager.add_to_conversation(
+                        self.current_session_id,
+                        "agent",
+                        response.get("message", ""),
+                        metadata={"confirmed_action": pending_action.get('type')}
+                    )
+                    return response
+
+                elif is_cancellation:
+                    logger.info("User canceled pending action")
+                    # Clear pending action
+                    self.session_manager.clear_pending_action(self.current_session_id)
+                    return {
+                        "success": True,
+                        "message": "Okay, I've canceled that. What else can I help you with?",
+                        "ui": None,
+                        "task_type": "cancellation"
+                    }
+                else:
+                    # User said something else - ask for clarification
+                    logger.info("User response unclear for pending action")
+                    return {
+                        "success": False,
+                        "message": pending_action.get('confirmation_prompt',
+                                   "I didn't catch that. Could you please say yes or no?"),
+                        "ui": None,
+                        "task_type": "clarification_needed"
+                    }
+
+            # No pending action - proceed with normal orchestrator flow
             # Step 1: Orchestrator classifies intent
             logger.info("Step 1: Classifying intent...")
             intent_result = await self.orchestrator.process_message(user_message)
@@ -197,20 +243,40 @@ class ElderCareAgent:
                 "task_type": "video_call"
             }
 
-        # Generate UI
-        ui = self.ui_generator.generate_call_ui(
-            contact=call_result["contact"],
-            deep_link=call_result["deep_link"]
+        # Check if this needs confirmation
+        contact = call_result["contact"]
+        contact_name = contact["contact_name"]
+        relationship = contact.get("relationship", "contact")
+
+        # Create friendly confirmation message
+        confirmation_prompt = f"Is this {contact_name}"
+        if relationship and relationship != "friend":
+            confirmation_prompt += f" (your {relationship})"
+        confirmation_prompt += f"? Phone: {contact.get('phone', 'N/A')}"
+
+        # Set pending action for user to confirm
+        self.session_manager.set_pending_action(
+            self.current_session_id,
+            {
+                "type": "VIDEO_CALL",
+                "data": {
+                    "contact": contact,
+                    "deep_link": call_result["deep_link"],
+                    "platform": call_result["platform"],
+                    "success_message": f"Perfect! Here's the button to call {contact_name}."
+                },
+                "confirmation_prompt": confirmation_prompt
+            }
         )
 
         return {
             "success": True,
-            "message": call_result.get("confirmation_message", "Ready to call!"),
-            "ui": ui,
-            "task_type": "video_call",
+            "message": confirmation_prompt,
+            "ui": None,  # UI will be shown after confirmation
+            "task_type": "video_call_confirmation",
             "metadata": {
-                "contact": call_result["contact"]["contact_name"],
-                "platform": call_result["platform"]
+                "awaiting_confirmation": True,
+                "contact": contact_name
             }
         }
 
@@ -288,6 +354,116 @@ class ElderCareAgent:
             "ui": None,
             "task_type": "unclear"
         }
+
+    def _is_confirmation(self, user_message: str) -> bool:
+        """
+        Check if user message is a confirmation.
+
+        Args:
+            user_message: User's message
+
+        Returns:
+            True if message is a confirmation
+        """
+        message_lower = user_message.lower().strip()
+
+        # Common confirmation patterns for elderly users
+        confirmations = [
+            "yes", "yeah", "yep", "yup", "sure", "ok", "okay",
+            "correct", "right", "that's right", "that's correct",
+            "he is", "she is", "that's him", "that's her",
+            "go ahead", "do it", "please", "proceed"
+        ]
+
+        return any(conf in message_lower for conf in confirmations)
+
+    def _is_cancellation(self, user_message: str) -> bool:
+        """
+        Check if user message is a cancellation.
+
+        Args:
+            user_message: User's message
+
+        Returns:
+            True if message is a cancellation
+        """
+        message_lower = user_message.lower().strip()
+
+        # Common cancellation patterns
+        cancellations = [
+            "no", "nope", "nah", "cancel", "stop", "never mind",
+            "not now", "later", "wrong", "that's wrong",
+            "not him", "not her", "no thanks"
+        ]
+
+        return any(canc in message_lower for canc in cancellations)
+
+    async def _execute_pending_action(self, pending_action: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Execute a pending action after user confirmation.
+
+        Args:
+            pending_action: The pending action dict
+
+        Returns:
+            Response dict with action result
+        """
+        action_type = pending_action.get("type")
+        data = pending_action.get("data", {})
+
+        logger.info(f"Executing pending action: {action_type}")
+
+        if action_type == "VIDEO_CALL":
+            # Generate UI for the confirmed call
+            ui = self.ui_generator.generate_call_ui(
+                contact=data.get("contact"),
+                deep_link=data.get("deep_link")
+            )
+
+            return {
+                "success": True,
+                "message": data.get("success_message", "Great! Tap the button below to start the call."),
+                "ui": ui,
+                "task_type": "video_call",
+                "metadata": {
+                    "contact": data["contact"]["contact_name"],
+                    "platform": data.get("platform", "whatsapp")
+                }
+            }
+
+        elif action_type == "MEDICATION":
+            # Generate medication UI
+            medication = data.get("medication")
+            ui = self.ui_generator.generate_medication_ui(medication)
+
+            return {
+                "success": True,
+                "message": data.get("success_message", "Here's your medication reminder."),
+                "ui": ui,
+                "task_type": "medication_reminder",
+                "metadata": {"medication": medication["medication_name"]}
+            }
+
+        elif action_type == "APPOINTMENT":
+            # Generate appointment UI
+            appointment = data.get("appointment")
+            ui = self.ui_generator.generate_appointment_ui(appointment)
+
+            return {
+                "success": True,
+                "message": data.get("success_message", "I've scheduled your appointment."),
+                "ui": ui,
+                "task_type": "appointment",
+                "metadata": {"doctor": appointment.get("doctor_name")}
+            }
+
+        else:
+            logger.warning(f"Unknown pending action type: {action_type}")
+            return {
+                "success": False,
+                "message": "I'm sorry, something went wrong. Please try again.",
+                "ui": None
+            }
 
     def get_session_history(self) -> list:
         """Get conversation history for current session."""
