@@ -1,0 +1,357 @@
+# User Profile: Margaret Thompson
+# Demo user for ElderCare Agent system
+
+user_id: "margaret_thompson"
+
+# Basic Information
+personal_info:
+  full_name: "Margaret Thompson"
+  preferred_name: "Margaret"
+  age: 72
+  date_of_birth: "1953-03-15"
+  gender: "female"
+  language: "en-US"
+  timezone: "America/New_York"
+
+# Contact Information
+contact:
+  phone: "+1-555-0100"
+  email: "margaret.thompson@email.com"
+  address:
+    street: "456 Oak Avenue"
+    city: "Springfield"
+    state: "MA"
+    zip: "01101"
+    country: "USA"
+
+# Family & Relationships
+family:
+  - name: "John Thompson"
+    relationship: "son"
+    age: 45
+    phone: "+1-555-0101"
+    email: "john.thompson@email.com"
+    preferred_contact: "whatsapp_video"
+    lives_in: "Boston, MA"
+    notes: "Calls every Sunday. Works in finance."
+    nicknames: ["Johnny", "my son"]
+
+  - name: "Sarah Chen"
+    relationship: "daughter"
+    maiden_name: "Sarah Thompson"
+    age: 42
+    phone: "+1-555-0102"
+    email: "sarah.chen@email.com"
+    preferred_contact: "facetime"
+    lives_in: "San Francisco, CA"
+    spouse: "Michael Chen"
+    notes: "Has two kids (Tim and Emma). Teacher."
+    nicknames: ["Sarah", "my daughter"]
+
+  - name: "Tim Chen"
+    relationship: "grandson"
+    age: 15
+    phone: "+1-555-0103"
+    email: "tim.chen@email.com"
+    preferred_contact: "facetime"
+    parents: ["Sarah Chen", "Michael Chen"]
+    notes: "High school student. Loves video games."
+    nicknames: ["Timmy", "my grandson", "Tim"]
+
+  - name: "Emma Chen"
+    relationship: "granddaughter"
+    age: 12
+    phone: "+1-555-0104"  # Parents' phone
+    parents: ["Sarah Chen", "Michael Chen"]
+    notes: "Middle school student. Plays piano."
+    nicknames: ["Emmy", "my granddaughter", "Emma"]
+
+# Healthcare Information
+healthcare:
+  primary_doctor:
+    name: "Dr. James Smith"
+    specialty: "Primary Care Physician"
+    clinic: "City Health Clinic"
+    address: "123 Main Street, Suite 204, Springfield, MA 01101"
+    phone: "+1-555-0200"
+    email: "dr.smith@cityhealthclinic.com"
+    years_as_patient: 15
+
+  specialists:
+    - name: "Dr. Lisa Johnson"
+      specialty: "Cardiologist"
+      clinic: "Heart Care Center"
+      phone: "+1-555-0201"
+      last_visit: "2024-09-10"
+
+  insurance:
+    provider: "Medicare"
+    policy_number: "MTH72-1953"
+    group_number: "MED-001"
+
+  medical_conditions:
+    - condition: "Hypertension"
+      diagnosed: "2015"
+      controlled: true
+      notes: "Well-managed with medication"
+
+    - condition: "Osteoarthritis"
+      diagnosed: "2018"
+      location: "knees"
+      notes: "Mild, managed with exercise and occasional pain relief"
+
+  allergies:
+    - allergen: "Penicillin"
+      reaction: "rash"
+      severity: "moderate"
+
+# Medications
+medications:
+  - medication_id: "med_001"
+    name: "Lisinopril"
+    generic_name: "Lisinopril"
+    brand_name: "Prinivil"
+    dosage: "10 mg"
+    form: "tablet"
+    color: "pink"
+    shape: "round"
+    frequency: "once_daily"
+    times: ["09:00"]
+    duration: "ongoing"
+    prescribing_doctor: "Dr. James Smith"
+    purpose: "Blood pressure control"
+    instructions: "Take with water, with or without food"
+    side_effects: ["dizziness", "dry cough"]
+    refill_date: "2024-12-01"
+    pharmacy: "Springfield Pharmacy"
+    important: true
+
+  - medication_id: "med_002"
+    name: "Aspirin"
+    generic_name: "Acetylsalicylic Acid"
+    dosage: "81 mg"
+    form: "tablet"
+    color: "white"
+    shape: "round"
+    frequency: "once_daily"
+    times: ["09:00"]
+    duration: "ongoing"
+    prescribing_doctor: "Dr. Lisa Johnson"
+    purpose: "Heart health / blood thinner"
+    instructions: "Take with food to prevent stomach upset"
+    side_effects: ["stomach irritation"]
+    refill_date: "2024-11-25"
+    pharmacy: "Springfield Pharmacy"
+    important: true
+
+  - medication_id: "med_003"
+    name: "Vitamin D3"
+    generic_name: "Cholecalciferol"
+    dosage: "2000 IU"
+    form: "softgel"
+    color: "yellow"
+    frequency: "once_daily"
+    times: ["12:00"]
+    duration: "ongoing"
+    prescribing_doctor: "Dr. James Smith"
+    purpose: "Bone health"
+    instructions: "Take with a meal containing fat for best absorption"
+    over_the_counter: true
+    refill_date: "2024-11-20"
+    pharmacy: "Springfield Pharmacy"
+    important: false
+
+# Medication Preferences
+medication_preferences:
+  reminder_advance_time: 5  # minutes before scheduled time
+  reminder_style: "gentle"  # gentle, standard, urgent
+  snooze_enabled: true
+  snooze_duration: 10  # minutes
+  voice_confirmation: true
+  track_adherence: true
+
+# Daily Routine
+daily_routine:
+  wake_up_time: "07:00"
+  breakfast_time: "07:30"
+  lunch_time: "12:00"
+  dinner_time: "18:00"
+  bedtime: "22:00"
+
+  typical_day:
+    - time: "07:00"
+      activity: "Wake up"
+    - time: "07:30"
+      activity: "Breakfast"
+    - time: "09:00"
+      activity: "Morning medications"
+    - time: "10:00"
+      activity: "Morning walk or exercise"
+    - time: "12:00"
+      activity: "Lunch and Vitamin D"
+    - time: "14:00"
+      activity: "Afternoon activities (reading, TV, hobbies)"
+    - time: "18:00"
+      activity: "Dinner"
+    - time: "20:00"
+      activity: "Family calls or TV"
+    - time: "22:00"
+      activity: "Bedtime"
+
+# Accessibility Needs
+accessibility:
+  vision:
+    needs_large_text: true
+    needs_high_contrast: true
+    wears_glasses: true
+    font_size_preference: "extra_large"
+
+  hearing:
+    needs_captions: false
+    needs_increased_volume: true
+    hearing_aid: false
+
+  mobility:
+    uses_cane: false
+    uses_walker: false
+    mobility_level: "good"
+    notes: "Some knee pain, but generally mobile"
+
+  technology:
+    comfort_level: "beginner"
+    owns_smartphone: true
+    smartphone_type: "iPhone"
+    needs_simple_ui: true
+    prefers_voice: true
+    struggles_with: ["small buttons", "complex menus", "typing"]
+
+# Communication Preferences
+communication_preferences:
+  preferred_channel: "voice"  # voice, text, both
+  speaking_pace: "slow"
+  language_complexity: "simple"
+  confirmation_needed: true
+  patient_explanations: true
+
+# Interests & Hobbies
+interests:
+  - "Gardening"
+  - "Watching classic movies"
+  - "Reading mystery novels"
+  - "Cooking"
+  - "Spending time with grandchildren"
+  - "Church activities on Sundays"
+
+# Weekly Schedule Patterns
+weekly_patterns:
+  sunday:
+    - time: "10:00"
+      activity: "Church"
+      regular: true
+    - time: "15:00"
+      activity: "Video call with John"
+      regular: true
+
+  wednesday:
+    - time: "14:00"
+      activity: "Book club (virtual)"
+      regular: true
+
+  friday:
+    - time: "19:00"
+      activity: "Video call with Sarah and grandkids"
+      regular: true
+
+# Emergency Contacts
+emergency_contacts:
+  - name: "John Thompson"
+    relationship: "son"
+    phone: "+1-555-0101"
+    priority: 1
+
+  - name: "Sarah Chen"
+    relationship: "daughter"
+    phone: "+1-555-0102"
+    priority: 2
+
+  - name: "Dr. James Smith"
+    relationship: "doctor"
+    phone: "+1-555-0200"
+    priority: 3
+
+  - name: "Springfield General Hospital"
+    relationship: "hospital"
+    phone: "911"
+    address: "789 Hospital Drive, Springfield, MA"
+    priority: 4
+
+# User Preferences (Learned Over Time)
+learned_preferences:
+  call_preferences:
+    john: "whatsapp_video"  # Prefers WhatsApp with son
+    sarah: "facetime"        # Prefers FaceTime with daughter
+    tim: "facetime"          # FaceTime with grandson
+
+  best_times_to_call:
+    john: ["sunday_afternoon", "weekday_evenings"]
+    sarah: ["friday_evening", "saturday_morning"]
+
+  ui_preferences:
+    show_photos: true
+    large_buttons: true
+    minimal_text: true
+    use_emojis: true
+
+# System Settings
+system_settings:
+  onboarding_completed: true
+  tutorial_completed: true
+  voice_training_completed: true
+  personalization_enabled: true
+
+  notifications:
+    medication_reminders: true
+    appointment_reminders: true
+    family_call_suggestions: true
+    health_tips: false  # Doesn't want health tips
+
+  privacy:
+    share_adherence_with_doctor: true
+    share_activity_with_family: false
+    allow_emergency_location: true
+
+# Agent Interaction History (Sample)
+interaction_history:
+  total_interactions: 156
+  successful_tasks: 148
+  user_satisfaction: 0.95
+
+  task_breakdown:
+    video_calls: 89
+    medication_reminders: 52
+    appointments: 15
+
+  favorite_features:
+    - "Video calling grandkids"
+    - "Medication reminders"
+    - "Simple, large buttons"
+
+  difficulties:
+    - "Sometimes forgets to unmute during calls"
+    - "Occasionally confused when agent asks clarifying questions"
+
+# Notes for Agents
+agent_notes:
+  - "Margaret is very sweet and patient, but gets confused with technical jargon"
+  - "She LOVES talking about her grandchildren - Tim and Emma"
+  - "Always confirm medication names clearly - she sometimes mishears"
+  - "Prefers video calls over phone calls when possible"
+  - "Very particular about taking medications on time"
+  - "Responds well to gentle, encouraging language"
+  - "If she says 'my son' without a name, she means John"
+  - "If she mentions 'the kids' she means her grandchildren"
+
+# Last Updated
+profile_version: "1.0"
+last_updated: "2024-11-16"
+created_date: "2024-10-01"

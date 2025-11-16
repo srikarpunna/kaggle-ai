@@ -1,0 +1,179 @@
+# ElderCare Agent System Configuration
+# All agents are defined here with their capabilities, tools, and parameters
+
+agents:
+  orchestrator:
+    name: "Orchestrator Agent"
+    description: "Main coordinator that understands user intent and routes to specialized agents"
+    model: "gemini-2.0-flash-exp"
+    temperature: 0.7
+    max_tokens: 1024
+    role: "You are a compassionate AI assistant helping elderly people with daily tasks. You understand natural speech, are patient, and provide clear, simple responses. Your job is to understand what the user wants and coordinate with specialized agents to help them."
+    capabilities:
+      - intent_recognition
+      - conversation_management
+      - agent_routing
+      - error_handling
+    routes_to:
+      - communication
+      - health
+      - ui_generator
+      - memory
+    tools:
+      - google_search
+      - memory_retrieval
+      - session_state
+    context_window: 8192
+
+  communication:
+    name: "Communication Agent"
+    description: "Handles video calls, phone calls, and messaging with family/friends"
+    model: "gemini-2.0-flash-exp"
+    temperature: 0.5
+    max_tokens: 512
+    role: "You are a communication specialist helping elderly people connect with their loved ones. You retrieve contact information and initiate calls through deep links to existing apps."
+    capabilities:
+      - contact_retrieval
+      - deeplink_generation
+      - relationship_understanding
+    tools:
+      - contacts_mcp
+      - deeplink_tool
+      - memory_retrieval
+    platforms:
+      whatsapp:
+        enabled: true
+        deeplink_format: "whatsapp://send?phone={phone}"
+      facetime:
+        enabled: true
+        deeplink_format: "facetime://{phone}"
+      zoom:
+        enabled: true
+        deeplink_format: "zoommtg://zoom.us/join?confno={meeting_id}"
+      phone:
+        enabled: true
+        deeplink_format: "tel:{phone}"
+
+  health:
+    name: "Health Agent"
+    description: "Manages medications, reminders, and doctor appointments"
+    model: "gemini-2.0-flash-exp"
+    temperature: 0.3
+    max_tokens: 512
+    role: "You are a healthcare assistant helping elderly people manage their medications and appointments. You are precise, caring, and always prioritize patient safety. You NEVER provide medical advice, only help with scheduling and reminders."
+    capabilities:
+      - medication_scheduling
+      - reminder_management
+      - appointment_booking
+      - medication_tracking
+    tools:
+      - health_mcp
+      - calendar_mcp
+      - notification_tool
+    safety_checks:
+      - verify_medication_name
+      - check_interaction_warnings
+      - confirm_dosage_with_user
+    reminder_types:
+      - medication
+      - appointment
+      - health_check
+
+  ui_generator:
+    name: "UI Generator Agent"
+    description: "Creates task-specific, accessible user interfaces with large icons"
+    model: "gemini-2.0-flash-exp"
+    temperature: 0.4
+    max_tokens: 1024
+    role: "You are a UI specialist creating simple, accessible interfaces for elderly users. You select the appropriate UI template based on the task and customize it with relevant information."
+    capabilities:
+      - template_selection
+      - ui_customization
+      - accessibility_optimization
+      - context_cleanup
+    tools:
+      - ui_template_loader
+      - icon_selector
+    templates:
+      - call_ui
+      - medication_ui
+      - appointment_ui
+      - confirmation_ui
+      - error_ui
+      - success_ui
+    accessibility:
+      min_font_size: 24
+      min_button_size: 80
+      high_contrast: true
+      simple_language: true
+      icon_required: true
+
+  memory:
+    name: "Memory Agent"
+    description: "Stores and retrieves user information, preferences, and history"
+    model: "gemini-2.0-flash-exp"
+    temperature: 0.2
+    max_tokens: 512
+    role: "You are a memory specialist that stores and retrieves information about the user. You understand context and relationships (e.g., 'my son' means a specific person)."
+    capabilities:
+      - profile_management
+      - relationship_mapping
+      - preference_learning
+      - history_tracking
+    storage:
+      short_term: "session_state"
+      long_term: "memory_bank_db"
+      user_profiles: "yaml_files"
+    tools:
+      - memory_bank
+      - user_profile_loader
+      - relationship_graph
+    retention:
+      session_data: "until_session_ends"
+      user_preferences: "permanent"
+      interaction_history: "90_days"
+
+# Agent interaction patterns
+interaction_patterns:
+  sequential:
+    - orchestrator -> memory (retrieve context)
+    - orchestrator -> communication (execute call)
+    - orchestrator -> ui_generator (show UI)
+
+  parallel:
+    - orchestrator -> [memory, health] (get user profile + medications)
+
+  loop:
+    - orchestrator -> ui_generator -> user_input -> orchestrator (conversation loop)
+
+# Observability configuration
+observability:
+  logging:
+    level: "INFO"
+    format: "json"
+    include_timestamps: true
+    include_agent_name: true
+    include_session_id: true
+
+  tracing:
+    enabled: true
+    trace_agent_calls: true
+    trace_tool_calls: true
+    trace_llm_calls: true
+
+  metrics:
+    enabled: true
+    track:
+      - task_completion_rate
+      - agent_response_time
+      - tool_call_success_rate
+      - user_satisfaction
+      - error_rate
+
+# Error handling
+error_handling:
+  max_retries: 3
+  retry_delay: 2
+  fallback_agent: "orchestrator"
+  user_friendly_errors: true
+  log_all_errors: true

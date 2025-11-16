@@ -1,0 +1,501 @@
+# ElderCare Agent - MCP Server Configurations
+# Defines all MCP servers for tools and data access
+
+mcp_servers:
+  contacts:
+    name: "Contacts MCP Server"
+    description: "Manages user contacts, relationships, and communication preferences"
+    port: 3001
+    transport: "stdio"
+
+    tools:
+      - name: "get_contact"
+        description: "Retrieve contact information by name or relationship"
+        input_schema:
+          type: "object"
+          properties:
+            query:
+              type: "string"
+              description: "Name or relationship (e.g., 'John', 'my son', 'daughter')"
+            user_id:
+              type: "string"
+              description: "ID of the user making the request"
+          required: ["query", "user_id"]
+        output_schema:
+          type: "object"
+          properties:
+            contact_name:
+              type: "string"
+            phone:
+              type: "string"
+            email:
+              type: "string"
+            relationship:
+              type: "string"
+            preferred_platform:
+              type: "string"
+              enum: ["whatsapp", "facetime", "phone", "zoom"]
+            photo_url:
+              type: "string"
+
+      - name: "list_contacts"
+        description: "List all contacts for a user"
+        input_schema:
+          type: "object"
+          properties:
+            user_id:
+              type: "string"
+          required: ["user_id"]
+        output_schema:
+          type: "array"
+          items:
+            type: "object"
+
+      - name: "add_contact"
+        description: "Add a new contact"
+        input_schema:
+          type: "object"
+          properties:
+            user_id:
+              type: "string"
+            contact_name:
+              type: "string"
+            phone:
+              type: "string"
+            relationship:
+              type: "string"
+            preferred_platform:
+              type: "string"
+          required: ["user_id", "contact_name"]
+
+    storage:
+      type: "sqlite"
+      database: "data/contacts.db"
+      tables:
+        contacts:
+          columns:
+            - id: "INTEGER PRIMARY KEY AUTOINCREMENT"
+            - user_id: "TEXT NOT NULL"
+            - contact_name: "TEXT NOT NULL"
+            - phone: "TEXT"
+            - email: "TEXT"
+            - relationship: "TEXT"
+            - preferred_platform: "TEXT"
+            - photo_url: "TEXT"
+            - created_at: "TIMESTAMP DEFAULT CURRENT_TIMESTAMP"
+            - updated_at: "TIMESTAMP DEFAULT CURRENT_TIMESTAMP"
+          indexes:
+            - "CREATE INDEX idx_user_id ON contacts(user_id)"
+            - "CREATE INDEX idx_relationship ON contacts(user_id, relationship)"
+
+  health:
+    name: "Health MCP Server"
+    description: "Manages medications, schedules, and health tracking"
+    port: 3002
+    transport: "stdio"
+
+    tools:
+      - name: "get_medications"
+        description: "Get all medications for a user"
+        input_schema:
+          type: "object"
+          properties:
+            user_id:
+              type: "string"
+          required: ["user_id"]
+        output_schema:
+          type: "array"
+          items:
+            type: "object"
+            properties:
+              medication_id:
+                type: "string"
+              medication_name:
+                type: "string"
+              dosage:
+                type: "string"
+              frequency:
+                type: "string"
+              times:
+                type: "array"
+                items:
+                  type: "string"
+              instructions:
+                type: "string"
+              image_url:
+                type: "string"
+
+      - name: "check_due_medications"
+        description: "Check which medications are due now or soon"
+        input_schema:
+          type: "object"
+          properties:
+            user_id:
+              type: "string"
+            current_time:
+              type: "string"
+              format: "ISO8601"
+            lookahead_minutes:
+              type: "integer"
+              default: 15
+          required: ["user_id", "current_time"]
+        output_schema:
+          type: "array"
+          items:
+            type: "object"
+
+      - name: "log_medication_taken"
+        description: "Record that a medication was taken"
+        input_schema:
+          type: "object"
+          properties:
+            user_id:
+              type: "string"
+            medication_id:
+              type: "string"
+            taken_at:
+              type: "string"
+              format: "ISO8601"
+            notes:
+              type: "string"
+          required: ["user_id", "medication_id", "taken_at"]
+        output_schema:
+          type: "object"
+          properties:
+            success:
+              type: "boolean"
+            log_id:
+              type: "string"
+
+      - name: "add_medication"
+        description: "Add a new medication to schedule"
+        input_schema:
+          type: "object"
+          properties:
+            user_id:
+              type: "string"
+            medication_name:
+              type: "string"
+            dosage:
+              type: "string"
+            frequency:
+              type: "string"
+              enum: ["once_daily", "twice_daily", "three_times_daily", "as_needed"]
+            times:
+              type: "array"
+              items:
+                type: "string"
+                pattern: "^([0-1][0-9]|2[0-3]):[0-5][0-9]$"
+            instructions:
+              type: "string"
+          required: ["user_id", "medication_name", "dosage", "frequency", "times"]
+
+      - name: "get_adherence_rate"
+        description: "Calculate medication adherence rate"
+        input_schema:
+          type: "object"
+          properties:
+            user_id:
+              type: "string"
+            start_date:
+              type: "string"
+              format: "date"
+            end_date:
+              type: "string"
+              format: "date"
+          required: ["user_id"]
+        output_schema:
+          type: "object"
+          properties:
+            adherence_rate:
+              type: "number"
+            total_scheduled:
+              type: "integer"
+            total_taken:
+              type: "integer"
+            missed_doses:
+              type: "integer"
+
+    storage:
+      type: "sqlite"
+      database: "data/health.db"
+      tables:
+        medications:
+          columns:
+            - id: "INTEGER PRIMARY KEY AUTOINCREMENT"
+            - user_id: "TEXT NOT NULL"
+            - medication_name: "TEXT NOT NULL"
+            - dosage: "TEXT NOT NULL"
+            - frequency: "TEXT NOT NULL"
+            - times: "TEXT NOT NULL"  # JSON array
+            - instructions: "TEXT"
+            - image_url: "TEXT"
+            - active: "BOOLEAN DEFAULT 1"
+            - created_at: "TIMESTAMP DEFAULT CURRENT_TIMESTAMP"
+
+        medication_logs:
+          columns:
+            - id: "INTEGER PRIMARY KEY AUTOINCREMENT"
+            - user_id: "TEXT NOT NULL"
+            - medication_id: "INTEGER NOT NULL"
+            - scheduled_time: "TIMESTAMP NOT NULL"
+            - taken_at: "TIMESTAMP"
+            - status: "TEXT NOT NULL"  # taken, missed, skipped
+            - notes: "TEXT"
+            - created_at: "TIMESTAMP DEFAULT CURRENT_TIMESTAMP"
+          indexes:
+            - "CREATE INDEX idx_user_medication ON medication_logs(user_id, medication_id)"
+            - "CREATE INDEX idx_scheduled_time ON medication_logs(scheduled_time)"
+
+  calendar:
+    name: "Calendar MCP Server"
+    description: "Manages appointments and calendar integration with Google Calendar"
+    port: 3003
+    transport: "stdio"
+
+    tools:
+      - name: "get_appointments"
+        description: "Get upcoming appointments for a user"
+        input_schema:
+          type: "object"
+          properties:
+            user_id:
+              type: "string"
+            start_date:
+              type: "string"
+              format: "date"
+            end_date:
+              type: "string"
+              format: "date"
+          required: ["user_id"]
+        output_schema:
+          type: "array"
+          items:
+            type: "object"
+            properties:
+              appointment_id:
+                type: "string"
+              title:
+                type: "string"
+              doctor_name:
+                type: "string"
+              date:
+                type: "string"
+              time:
+                type: "string"
+              location:
+                type: "string"
+              notes:
+                type: "string"
+
+      - name: "create_appointment"
+        description: "Create a new appointment"
+        input_schema:
+          type: "object"
+          properties:
+            user_id:
+              type: "string"
+            title:
+              type: "string"
+            doctor_name:
+              type: "string"
+            date:
+              type: "string"
+              format: "date"
+            time:
+              type: "string"
+              pattern: "^([0-1][0-9]|2[0-3]):[0-5][0-9]$"
+            duration_minutes:
+              type: "integer"
+              default: 30
+            location:
+              type: "string"
+            notes:
+              type: "string"
+          required: ["user_id", "title", "date", "time"]
+        output_schema:
+          type: "object"
+          properties:
+            success:
+              type: "boolean"
+            appointment_id:
+              type: "string"
+            calendar_event_id:
+              type: "string"
+
+      - name: "sync_to_google_calendar"
+        description: "Sync an appointment to Google Calendar"
+        input_schema:
+          type: "object"
+          properties:
+            appointment_id:
+              type: "string"
+            user_calendar_id:
+              type: "string"
+          required: ["appointment_id"]
+        output_schema:
+          type: "object"
+          properties:
+            success:
+              type: "boolean"
+            google_event_id:
+              type: "string"
+            error:
+              type: "string"
+
+      - name: "check_availability"
+        description: "Check available time slots"
+        input_schema:
+          type: "object"
+          properties:
+            doctor_id:
+              type: "string"
+            start_date:
+              type: "string"
+              format: "date"
+            end_date:
+              type: "string"
+              format: "date"
+          required: ["doctor_id", "start_date"]
+        output_schema:
+          type: "array"
+          items:
+            type: "object"
+            properties:
+              date:
+                type: "string"
+              time:
+                type: "string"
+              available:
+                type: "boolean"
+
+    integrations:
+      google_calendar:
+        enabled: true
+        auth_type: "oauth2"
+        scopes:
+          - "https://www.googleapis.com/auth/calendar.events"
+        credentials_file: "config/google_calendar_credentials.json"
+        token_file: "data/google_calendar_token.json"
+
+    storage:
+      type: "sqlite"
+      database: "data/calendar.db"
+      tables:
+        appointments:
+          columns:
+            - id: "INTEGER PRIMARY KEY AUTOINCREMENT"
+            - user_id: "TEXT NOT NULL"
+            - title: "TEXT NOT NULL"
+            - doctor_name: "TEXT"
+            - date: "DATE NOT NULL"
+            - time: "TIME NOT NULL"
+            - duration_minutes: "INTEGER DEFAULT 30"
+            - location: "TEXT"
+            - notes: "TEXT"
+            - google_event_id: "TEXT"
+            - status: "TEXT DEFAULT 'scheduled'"  # scheduled, completed, cancelled
+            - created_at: "TIMESTAMP DEFAULT CURRENT_TIMESTAMP"
+          indexes:
+            - "CREATE INDEX idx_user_date ON appointments(user_id, date)"
+
+        doctors:
+          columns:
+            - id: "INTEGER PRIMARY KEY AUTOINCREMENT"
+            - name: "TEXT NOT NULL"
+            - specialty: "TEXT"
+            - clinic: "TEXT"
+            - address: "TEXT"
+            - phone: "TEXT"
+
+# MCP Server Runtime Configuration
+runtime:
+  auto_start: true
+  restart_on_failure: true
+  max_restart_attempts: 3
+  health_check_interval: 30  # seconds
+
+  logging:
+    level: "INFO"
+    format: "json"
+    file: "logs/mcp_servers.log"
+    max_size: "10MB"
+    rotation: "daily"
+
+  security:
+    enable_auth: false  # Set to true for production
+    allowed_origins: ["localhost"]
+    rate_limiting:
+      enabled: true
+      max_requests_per_minute: 100
+
+# MCP Client Configuration (for agents to connect to servers)
+mcp_client:
+  timeout: 30  # seconds
+  retry_attempts: 3
+  retry_delay: 2  # seconds
+
+  connection_pool:
+    max_connections: 10
+    idle_timeout: 300  # seconds
+
+# Development/Demo Data
+demo_data:
+  enabled: true
+  auto_populate: true
+  demo_user_id: "margaret_thompson"
+
+  seed_data:
+    contacts:
+      - contact_name: "John Thompson"
+        phone: "+1-555-0101"
+        relationship: "son"
+        preferred_platform: "whatsapp"
+        photo_url: "/images/contacts/john.jpg"
+
+      - contact_name: "Sarah Thompson"
+        phone: "+1-555-0102"
+        relationship: "daughter"
+        preferred_platform: "facetime"
+        photo_url: "/images/contacts/sarah.jpg"
+
+      - contact_name: "Tim Chen"
+        phone: "+1-555-0103"
+        relationship: "grandson"
+        preferred_platform: "facetime"
+        photo_url: "/images/contacts/tim.jpg"
+
+      - contact_name: "Dr. James Smith"
+        phone: "+1-555-0200"
+        relationship: "doctor"
+        preferred_platform: "phone"
+        photo_url: "/images/contacts/dr_smith.jpg"
+
+    medications:
+      - medication_name: "Lisinopril"
+        dosage: "10 mg"
+        frequency: "once_daily"
+        times: ["09:00"]
+        instructions: "Take with water, with or without food. For blood pressure."
+        image_url: "/images/medications/lisinopril.png"
+
+      - medication_name: "Aspirin"
+        dosage: "81 mg"
+        frequency: "once_daily"
+        times: ["09:00"]
+        instructions: "Take with food to prevent stomach upset."
+        image_url: "/images/medications/aspirin.png"
+
+      - medication_name: "Vitamin D3"
+        dosage: "2000 IU"
+        frequency: "once_daily"
+        times: ["12:00"]
+        instructions: "Take with a meal containing fat for best absorption."
+        image_url: "/images/medications/vitamin_d.png"
+
+    doctors:
+      - name: "Dr. James Smith"
+        specialty: "Primary Care"
+        clinic: "City Health Clinic"
+        address: "123 Main Street, Room 204, Springfield"
+        phone: "+1-555-0200"

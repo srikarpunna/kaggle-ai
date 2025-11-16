@@ -1,0 +1,272 @@
+# ElderCare Agent - Task Definitions
+# Defines the 3 core tasks: video calls, medication reminders, doctor appointments
+
+tasks:
+  video_call:
+    name: "Video Call Family"
+    description: "Initiate video or voice calls with family members and friends"
+    category: "communication"
+    priority: "high"
+
+    intent_patterns:
+      - "call {person}"
+      - "video call {person}"
+      - "talk to {person}"
+      - "reach {person}"
+      - "connect with {person}"
+      - "phone {person}"
+      - "facetime {person}"
+
+    required_information:
+      - contact_name
+
+    optional_information:
+      - call_type  # video, voice, whatsapp
+      - preferred_platform
+
+    agent_workflow:
+      - agent: orchestrator
+        action: parse_intent
+        extract: [contact_name, call_type]
+
+      - agent: memory
+        action: retrieve_contact
+        input: contact_name
+        output: contact_details
+
+      - agent: communication
+        action: generate_deeplink
+        input: contact_details
+        output: call_url
+
+      - agent: ui_generator
+        action: show_call_ui
+        input: [contact_details, call_url]
+
+    success_criteria:
+      - contact_found: true
+      - deeplink_generated: true
+      - ui_displayed: true
+
+    ui_template: "call_ui"
+
+    examples:
+      - user_input: "Call my son"
+        expected_contact: "John Thompson"
+        expected_action: "Generate WhatsApp video call link"
+
+      - user_input: "I want to talk to Sarah"
+        expected_contact: "Sarah Thompson"
+        expected_action: "Generate phone call link"
+
+      - user_input: "FaceTime my grandson"
+        expected_contact: "Tim Chen"
+        expected_action: "Generate FaceTime link"
+
+  medication_reminder:
+    name: "Medication Reminders"
+    description: "Set up, manage, and deliver medication reminders"
+    category: "health"
+    priority: "critical"
+
+    intent_patterns:
+      - "remind me to take {medication}"
+      - "medication reminder for {medication}"
+      - "I need to take my {medication}"
+      - "set up reminder for {medication}"
+      - "what medications do I need to take"
+      - "did I take my {medication}"
+
+    required_information:
+      - medication_name
+
+    optional_information:
+      - dosage
+      - frequency
+      - time_of_day
+      - with_food
+
+    agent_workflow:
+      - agent: orchestrator
+        action: parse_intent
+        extract: [medication_name, action_type]
+
+      - agent: memory
+        action: retrieve_medication_schedule
+        input: user_id
+        output: medication_list
+
+      - agent: health
+        action: check_medication
+        input: [medication_name, current_time]
+        output: reminder_status
+
+      - agent: ui_generator
+        action: show_medication_ui
+        input: [medication_name, dosage, image]
+
+    reminder_schedule:
+      check_interval: 60  # seconds
+      advance_notice: 300  # 5 minutes before
+      snooze_duration: 600  # 10 minutes
+      max_snoozes: 3
+
+    success_criteria:
+      - medication_identified: true
+      - schedule_retrieved: true
+      - reminder_delivered: true
+      - user_acknowledged: true
+
+    ui_template: "medication_ui"
+
+    tracking:
+      - log_taken_time: true
+      - log_skipped: true
+      - log_snooze_count: true
+      - adherence_rate: true
+
+    examples:
+      - user_input: "Did I take my heart medication?"
+        expected_medication: "Lisinopril"
+        expected_action: "Check today's log and respond"
+
+      - user_input: "Remind me to take aspirin at 9 AM"
+        expected_medication: "Aspirin"
+        expected_action: "Set up daily 9 AM reminder"
+
+      - trigger: "time_based"
+        time: "09:00"
+        medication: "Lisinopril"
+        expected_action: "Show medication reminder UI"
+
+  doctor_appointment:
+    name: "Doctor Appointments"
+    description: "Schedule, manage, and remind about doctor appointments"
+    category: "health"
+    priority: "high"
+
+    intent_patterns:
+      - "book appointment with {doctor}"
+      - "schedule doctor appointment"
+      - "I need to see {doctor}"
+      - "when is my next appointment"
+      - "make appointment for {day}"
+      - "doctor appointment {time}"
+
+    required_information:
+      - appointment_type  # checkup, consultation, follow-up
+
+    optional_information:
+      - doctor_name
+      - preferred_date
+      - preferred_time
+      - reason
+
+    agent_workflow:
+      - agent: orchestrator
+        action: parse_intent
+        extract: [doctor_name, date, time, reason]
+
+      - agent: memory
+        action: retrieve_doctor_info
+        input: doctor_name
+        output: doctor_details
+
+      - agent: health
+        action: check_availability
+        input: [doctor_details, date, time]
+        output: available_slots
+
+      - agent: health
+        action: book_appointment
+        input: [selected_slot, user_details, reason]
+        output: appointment_confirmation
+
+      - agent: ui_generator
+        action: show_appointment_ui
+        input: appointment_confirmation
+
+    calendar_integration:
+      service: "google_calendar"
+      create_event: true
+      set_reminder: true
+      reminder_times: [1440, 60]  # 1 day before, 1 hour before (in minutes)
+
+    success_criteria:
+      - slot_found: true
+      - calendar_event_created: true
+      - confirmation_received: true
+      - reminder_set: true
+
+    ui_template: "appointment_ui"
+
+    examples:
+      - user_input: "I need to see Dr. Smith next Tuesday"
+        expected_doctor: "Dr. Smith"
+        expected_date: "next Tuesday"
+        expected_action: "Show available time slots"
+
+      - user_input: "Book my checkup for Thursday at 2 PM"
+        expected_type: "checkup"
+        expected_time: "14:00"
+        expected_action: "Create calendar event"
+
+      - user_input: "When is my next doctor appointment?"
+        expected_action: "Retrieve upcoming appointments from calendar"
+
+# Task priority rules
+priority_rules:
+  - if: "task.category == 'health' AND task.priority == 'critical'"
+    then: "interrupt_current_task"
+
+  - if: "task.name == 'medication_reminder' AND time_sensitive"
+    then: "show_immediate_notification"
+
+  - if: "multiple_tasks_pending"
+    then: "sort_by_priority_and_time"
+
+# Success metrics
+success_metrics:
+  video_call:
+    - contact_found_rate: 0.95
+    - deeplink_success_rate: 0.99
+    - user_completion_rate: 0.90
+
+  medication_reminder:
+    - reminder_delivery_rate: 0.99
+    - adherence_rate: 0.85
+    - on_time_rate: 0.95
+
+  doctor_appointment:
+    - booking_success_rate: 0.90
+    - calendar_sync_rate: 0.99
+    - reminder_delivery_rate: 0.99
+
+# Error handling per task
+error_scenarios:
+  video_call:
+    contact_not_found:
+      message: "I couldn't find {contact_name} in your contacts. Would you like to add them?"
+      action: "offer_to_add_contact"
+
+    platform_not_available:
+      message: "I can't open {platform} right now. Would you like to try calling instead?"
+      action: "offer_alternative"
+
+  medication_reminder:
+    medication_not_found:
+      message: "I don't have {medication_name} in your medication list. Would you like to add it?"
+      action: "offer_to_add_medication"
+
+    time_conflict:
+      message: "You already have a reminder at this time. Should I adjust the schedule?"
+      action: "suggest_alternative_time"
+
+  doctor_appointment:
+    no_slots_available:
+      message: "Dr. {doctor_name} doesn't have available slots on {date}. Here are alternative dates."
+      action: "show_alternative_slots"
+
+    calendar_sync_failed:
+      message: "I booked your appointment but couldn't add it to your calendar. I've saved the details here."
+      action: "show_appointment_details"

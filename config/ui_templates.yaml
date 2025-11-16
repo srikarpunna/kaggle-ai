@@ -1,0 +1,534 @@
+# ElderCare Agent - UI Template Configurations
+# Defines all UI templates with accessibility-first design
+
+templates:
+  call_ui:
+    name: "Video Call Interface"
+    description: "Simple UI for initiating video/phone calls"
+    accessibility_level: "maximum"
+
+    layout:
+      type: "centered_single_action"
+      background_color: "#FFFFFF"
+      max_width: 400
+
+    elements:
+      - type: "image"
+        id: "contact_photo"
+        size: 120
+        shape: "circle"
+        border: "4px solid #2196F3"
+        fallback: "👤"  # emoji fallback if no photo
+        position: "top_center"
+
+      - type: "text"
+        id: "contact_name"
+        font_size: 32
+        font_weight: "bold"
+        color: "#212121"
+        margin_top: 16
+        text_align: "center"
+
+      - type: "text"
+        id: "relationship"
+        font_size: 20
+        color: "#666666"
+        margin_top: 4
+        text_align: "center"
+        text_transform: "capitalize"
+
+      - type: "button"
+        id: "call_button"
+        width: 200
+        height: 80
+        background_color: "#4CAF50"
+        text_color: "#FFFFFF"
+        font_size: 24
+        icon: "📞"
+        border_radius: 12
+        margin_top: 32
+        action: "open_deeplink"
+        hover_effect: "scale_1.05"
+
+      - type: "button"
+        id: "cancel_button"
+        width: 160
+        height: 60
+        background_color: "#F5F5F5"
+        text_color: "#666666"
+        font_size: 20
+        border_radius: 8
+        margin_top: 16
+        action: "close_ui"
+
+    animations:
+      entrance: "fade_in"
+      exit: "fade_out"
+      duration: 300
+
+    auto_cleanup:
+      trigger: "on_action_complete"
+      delay: 1000
+
+    example_data:
+      contact_photo: "/images/john.jpg"
+      contact_name: "John Thompson"
+      relationship: "Your son"
+      call_button_text: "📞 Video Call"
+      cancel_button_text: "Cancel"
+
+  medication_ui:
+    name: "Medication Reminder Interface"
+    description: "UI for medication reminders with large, clear visuals"
+    accessibility_level: "maximum"
+
+    layout:
+      type: "centered_card"
+      background_color: "#FFF9C4"  # Subtle yellow for attention
+      max_width: 450
+      padding: 24
+
+    elements:
+      - type: "icon"
+        id: "alert_icon"
+        content: "⏰"
+        font_size: 48
+        position: "top_center"
+
+      - type: "text"
+        id: "reminder_title"
+        content: "Time for Your Medication"
+        font_size: 28
+        font_weight: "bold"
+        color: "#D32F2F"
+        margin_top: 16
+        text_align: "center"
+
+      - type: "image"
+        id: "medication_image"
+        size: 100
+        shape: "rounded_square"
+        border: "2px solid #E0E0E0"
+        margin_top: 24
+        position: "center"
+
+      - type: "text"
+        id: "medication_name"
+        font_size: 30
+        font_weight: "bold"
+        color: "#212121"
+        margin_top: 16
+        text_align: "center"
+
+      - type: "text"
+        id: "dosage"
+        font_size: 24
+        color: "#424242"
+        margin_top: 8
+        text_align: "center"
+
+      - type: "text"
+        id: "instructions"
+        font_size: 20
+        color: "#666666"
+        margin_top: 12
+        text_align: "center"
+        max_lines: 2
+
+      - type: "button"
+        id: "taken_button"
+        width: 220
+        height: 80
+        background_color: "#4CAF50"
+        text_color: "#FFFFFF"
+        font_size: 26
+        icon: "✓"
+        border_radius: 12
+        margin_top: 32
+        action: "mark_taken"
+        haptic_feedback: true
+
+      - type: "button"
+        id: "snooze_button"
+        width: 180
+        height: 60
+        background_color: "#FF9800"
+        text_color: "#FFFFFF"
+        font_size: 22
+        icon: "💤"
+        border_radius: 8
+        margin_top: 12
+        action: "snooze"
+
+      - type: "button"
+        id: "skip_button"
+        width: 140
+        height: 50
+        background_color: "#F5F5F5"
+        text_color: "#666666"
+        font_size: 18
+        border_radius: 8
+        margin_top: 12
+        action: "skip"
+
+    animations:
+      entrance: "slide_up"
+      attention: "gentle_pulse"
+      exit: "fade_out"
+
+    auto_cleanup:
+      trigger: "on_taken_or_skip"
+      delay: 2000
+      show_confirmation: true
+
+    audio_alert:
+      enabled: true
+      sound: "gentle_chime"
+      volume: 0.7
+
+    example_data:
+      medication_image: "/images/pills/lisinopril.png"
+      medication_name: "Lisinopril"
+      dosage: "10 mg"
+      instructions: "Take with water, with or without food"
+      taken_button_text: "✓ I Took It"
+      snooze_button_text: "💤 Remind Me in 10 Min"
+      skip_button_text: "Skip"
+
+  appointment_ui:
+    name: "Doctor Appointment Interface"
+    description: "UI for confirming and viewing appointments"
+    accessibility_level: "maximum"
+
+    layout:
+      type: "card_with_details"
+      background_color: "#E3F2FD"  # Light blue
+      max_width: 500
+      padding: 24
+
+    elements:
+      - type: "icon"
+        id: "calendar_icon"
+        content: "📅"
+        font_size: 48
+        position: "top_center"
+
+      - type: "text"
+        id: "appointment_title"
+        content: "Doctor Appointment"
+        font_size: 28
+        font_weight: "bold"
+        color: "#1976D2"
+        margin_top: 16
+        text_align: "center"
+
+      - type: "info_row"
+        id: "doctor_info"
+        margin_top: 32
+        items:
+          - icon: "👨‍⚕️"
+            label: "Doctor"
+            value_id: "doctor_name"
+            font_size: 22
+
+      - type: "info_row"
+        id: "date_info"
+        margin_top: 16
+        items:
+          - icon: "📆"
+            label: "Date"
+            value_id: "appointment_date"
+            font_size: 22
+
+      - type: "info_row"
+        id: "time_info"
+        margin_top: 16
+        items:
+          - icon: "🕐"
+            label: "Time"
+            value_id: "appointment_time"
+            font_size: 22
+
+      - type: "info_row"
+        id: "location_info"
+        margin_top: 16
+        items:
+          - icon: "📍"
+            label: "Location"
+            value_id: "location"
+            font_size: 20
+
+      - type: "text"
+        id: "reminder_note"
+        content: "I'll remind you 1 day and 1 hour before"
+        font_size: 18
+        color: "#666666"
+        margin_top: 24
+        text_align: "center"
+        style: "italic"
+
+      - type: "button"
+        id: "confirm_button"
+        width: 220
+        height: 80
+        background_color: "#2196F3"
+        text_color: "#FFFFFF"
+        font_size: 24
+        icon: "✓"
+        border_radius: 12
+        margin_top: 32
+        action: "confirm_appointment"
+
+      - type: "button"
+        id: "change_button"
+        width: 180
+        height: 60
+        background_color: "#F5F5F5"
+        text_color: "#1976D2"
+        font_size: 20
+        border_radius: 8
+        margin_top: 12
+        action: "request_change"
+
+    animations:
+      entrance: "slide_in_right"
+      exit: "slide_out_right"
+
+    auto_cleanup:
+      trigger: "on_confirm"
+      delay: 2000
+      show_success_message: true
+
+    example_data:
+      doctor_name: "Dr. James Smith"
+      appointment_date: "Thursday, November 21"
+      appointment_time: "10:30 AM"
+      location: "City Health Clinic, Room 204"
+      confirm_button_text: "✓ Confirm"
+      change_button_text: "Change Time"
+
+  confirmation_ui:
+    name: "Yes/No Confirmation Interface"
+    description: "Simple confirmation dialog"
+    accessibility_level: "maximum"
+
+    layout:
+      type: "centered_dialog"
+      background_color: "#FFFFFF"
+      max_width: 400
+      padding: 32
+
+    elements:
+      - type: "icon"
+        id: "question_icon"
+        content: "❓"
+        font_size: 56
+        position: "top_center"
+
+      - type: "text"
+        id: "question_text"
+        font_size: 24
+        font_weight: "normal"
+        color: "#212121"
+        margin_top: 24
+        text_align: "center"
+        max_lines: 3
+
+      - type: "button_group"
+        layout: "horizontal"
+        margin_top: 32
+        gap: 16
+        buttons:
+          - id: "yes_button"
+            width: 140
+            height: 80
+            background_color: "#4CAF50"
+            text_color: "#FFFFFF"
+            font_size: 28
+            content: "✓ Yes"
+            border_radius: 12
+            action: "confirm_yes"
+
+          - id: "no_button"
+            width: 140
+            height: 80
+            background_color: "#F44336"
+            text_color: "#FFFFFF"
+            font_size: 28
+            content: "✗ No"
+            border_radius: 12
+            action: "confirm_no"
+
+    animations:
+      entrance: "scale_in"
+      exit: "scale_out"
+
+    example_data:
+      question_text: "Is this your son John?"
+
+  success_ui:
+    name: "Success Confirmation Interface"
+    description: "Shows successful task completion"
+    accessibility_level: "high"
+
+    layout:
+      type: "centered_message"
+      background_color: "#E8F5E9"  # Light green
+      max_width: 400
+      padding: 40
+
+    elements:
+      - type: "icon"
+        id: "success_icon"
+        content: "✓"
+        font_size: 72
+        color: "#4CAF50"
+        position: "center"
+
+      - type: "text"
+        id: "success_message"
+        font_size: 26
+        font_weight: "bold"
+        color: "#2E7D32"
+        margin_top: 24
+        text_align: "center"
+
+      - type: "text"
+        id: "success_details"
+        font_size: 20
+        color: "#558B2F"
+        margin_top: 12
+        text_align: "center"
+
+    animations:
+      entrance: "bounce_in"
+      exit: "fade_out"
+
+    auto_cleanup:
+      trigger: "auto"
+      delay: 3000
+
+    example_data:
+      success_message: "Done!"
+      success_details: "Appointment scheduled successfully"
+
+  error_ui:
+    name: "Error Message Interface"
+    description: "Shows errors in user-friendly way"
+    accessibility_level: "high"
+
+    layout:
+      type: "centered_message"
+      background_color: "#FFEBEE"  # Light red
+      max_width: 400
+      padding: 32
+
+    elements:
+      - type: "icon"
+        id: "error_icon"
+        content: "⚠️"
+        font_size: 56
+        position: "center"
+
+      - type: "text"
+        id: "error_title"
+        content: "Oops!"
+        font_size: 28
+        font_weight: "bold"
+        color: "#C62828"
+        margin_top: 16
+        text_align: "center"
+
+      - type: "text"
+        id: "error_message"
+        font_size: 22
+        color: "#424242"
+        margin_top: 12
+        text_align: "center"
+        max_lines: 3
+
+      - type: "button"
+        id: "retry_button"
+        width: 160
+        height: 60
+        background_color: "#2196F3"
+        text_color: "#FFFFFF"
+        font_size: 20
+        content: "Try Again"
+        border_radius: 8
+        margin_top: 24
+        action: "retry"
+
+      - type: "button"
+        id: "close_button"
+        width: 120
+        height: 50
+        background_color: "#F5F5F5"
+        text_color: "#666666"
+        font_size: 18
+        content: "Close"
+        border_radius: 8
+        margin_top: 12
+        action: "close_ui"
+
+    animations:
+      entrance: "shake"
+      exit: "fade_out"
+
+    example_data:
+      error_message: "I couldn't find that contact. Please try again."
+
+# Global accessibility settings
+accessibility:
+  font_family: "Arial, sans-serif"  # Highly readable font
+  min_contrast_ratio: 4.5  # WCAG AA standard
+  tap_target_min_size: 44  # iOS accessibility guidelines
+  enable_screen_reader: true
+  enable_voice_feedback: true
+  high_contrast_mode: true
+  large_text_mode: true
+  reduce_motion_option: true
+
+# Responsive design
+responsive:
+  mobile:
+    max_width: 480
+    font_scale: 1.0
+    button_scale: 1.0
+
+  tablet:
+    max_width: 768
+    font_scale: 1.1
+    button_scale: 1.1
+
+  desktop:
+    max_width: 1024
+    font_scale: 1.2
+    button_scale: 1.0
+
+# Color palette (all high contrast, elderly-friendly)
+colors:
+  primary: "#2196F3"      # Blue
+  success: "#4CAF50"      # Green
+  warning: "#FF9800"      # Orange
+  error: "#F44336"        # Red
+  text_primary: "#212121" # Almost black
+  text_secondary: "#666666" # Gray
+  background: "#FFFFFF"   # White
+  border: "#E0E0E0"       # Light gray
+
+# Icon library (using emojis for universal support)
+icons:
+  person: "👤"
+  call: "📞"
+  video: "📹"
+  pill: "💊"
+  calendar: "📅"
+  clock: "🕐"
+  doctor: "👨‍⚕️"
+  location: "📍"
+  checkmark: "✓"
+  cross: "✗"
+  alert: "⚠️"
+  question: "❓"
+  sleep: "💤"
