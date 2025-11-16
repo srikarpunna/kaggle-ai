@@ -1,0 +1,578 @@
+/* ElderCare Agent - Voice Mode CSS */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #000000;
+    color: #ffffff;
+    overflow: hidden;
+    width: 100vw;
+    height: 100vh;
+}
+
+/* ==================== Main Voice Interface ==================== */
+
+#voice-interface {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+/* ==================== Circle Visualizer ==================== */
+
+#circle-container {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 300px;
+    height: 300px;
+    z-index: 10;
+}
+
+#audio-visualizer {
+    width: 100%;
+    height: 100%;
+}
+
+/* Main circle states */
+#main-circle {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Idle state - gray breathing pulse */
+#main-circle.idle {
+    stroke: #666666;
+    animation: breathe 3s ease-in-out infinite;
+}
+
+/* Listening state - blue, enlarged */
+#main-circle.listening {
+    stroke: #2196F3;
+    r: 130;
+    animation: listening-pulse 2s ease-in-out infinite;
+}
+
+/* Speaking state - green with frequency bars */
+#main-circle.speaking {
+    stroke: #4CAF50;
+    animation: none;
+}
+
+/* Thinking state - purple rotating */
+#main-circle.thinking {
+    stroke: #9C27B0;
+    animation: rotate 2s linear infinite;
+}
+
+/* Pulse circle */
+#pulse-circle {
+    transition: all 0.5s ease-out;
+}
+
+#pulse-circle.active {
+    animation: pulse-wave 1.5s ease-out infinite;
+}
+
+/* Frequency bars */
+.frequency-bar {
+    fill: none;
+    stroke-width: 3;
+    stroke-linecap: round;
+    transition: all 0.1s ease-out;
+}
+
+#main-circle.idle ~ #frequency-bars .frequency-bar {
+    stroke: #666666;
+    opacity: 0.3;
+}
+
+#main-circle.listening ~ #frequency-bars .frequency-bar {
+    stroke: #2196F3;
+    opacity: 0.6;
+}
+
+#main-circle.speaking ~ #frequency-bars .frequency-bar {
+    stroke: #4CAF50;
+    opacity: 0.8;
+}
+
+#main-circle.thinking ~ #frequency-bars .frequency-bar {
+    stroke: #9C27B0;
+    opacity: 0.5;
+}
+
+/* ==================== Animations ==================== */
+
+@keyframes breathe {
+    0%, 100% {
+        opacity: 0.7;
+        filter: drop-shadow(0 0 10px rgba(102, 102, 102, 0.5));
+    }
+    50% {
+        opacity: 1;
+        filter: drop-shadow(0 0 20px rgba(102, 102, 102, 0.8));
+    }
+}
+
+@keyframes listening-pulse {
+    0%, 100% {
+        filter: drop-shadow(0 0 15px rgba(33, 150, 243, 0.6));
+    }
+    50% {
+        filter: drop-shadow(0 0 30px rgba(33, 150, 243, 0.9));
+    }
+}
+
+@keyframes pulse-wave {
+    0% {
+        r: 120;
+        opacity: 0.6;
+    }
+    100% {
+        r: 160;
+        opacity: 0;
+    }
+}
+
+@keyframes rotate {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* ==================== Conversation Area ==================== */
+
+#conversation-area {
+    position: absolute;
+    bottom: 80px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90%;
+    max-width: 800px;
+    text-align: center;
+    z-index: 5;
+}
+
+.message {
+    margin: 15px 0;
+    font-size: 28px;
+    line-height: 1.5;
+    opacity: 0;
+    transition: opacity 0.3s ease-in;
+}
+
+.message.visible {
+    opacity: 1;
+}
+
+.user-msg {
+    color: #2196F3;
+    font-weight: 400;
+}
+
+.agent-msg {
+    color: #ffffff;
+    font-weight: 300;
+}
+
+/* Typing cursor effect */
+.typing-cursor::after {
+    content: '|';
+    animation: blink 1s step-end infinite;
+}
+
+@keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+}
+
+/* ==================== Voice Controls ==================== */
+
+#voice-controls {
+    position: absolute;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    z-index: 20;
+}
+
+.voice-btn {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    border: 3px solid #4CAF50;
+    background-color: rgba(76, 175, 80, 0.1);
+    color: #ffffff;
+    font-size: 36px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.voice-btn:hover {
+    background-color: rgba(76, 175, 80, 0.2);
+    transform: scale(1.05);
+}
+
+.voice-btn:active {
+    background-color: rgba(76, 175, 80, 0.3);
+    transform: scale(0.95);
+}
+
+.voice-btn.listening {
+    border-color: #2196F3;
+    background-color: rgba(33, 150, 243, 0.2);
+    animation: mic-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes mic-pulse {
+    0%, 100% {
+        box-shadow: 0 0 10px rgba(33, 150, 243, 0.5);
+    }
+    50% {
+        box-shadow: 0 0 25px rgba(33, 150, 243, 0.8);
+    }
+}
+
+.status {
+    font-size: 18px;
+    color: #999999;
+    text-align: center;
+}
+
+/* ==================== UI Overlay (Full Screen Takeover) ==================== */
+
+#ui-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.95);
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease-in-out;
+}
+
+#ui-overlay.visible {
+    opacity: 1;
+    pointer-events: all;
+}
+
+#ui-overlay.hidden {
+    display: none;
+}
+
+.close-btn {
+    position: absolute;
+    top: 30px;
+    right: 30px;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    border: 2px solid #ffffff;
+    background-color: rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+    font-size: 32px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 300;
+}
+
+.close-btn:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+    transform: scale(1.1);
+}
+
+#ui-content {
+    background-color: #ffffff;
+    border-radius: 20px;
+    padding: 50px;
+    max-width: 600px;
+    width: 90%;
+    box-shadow: 0 10px 50px rgba(255, 255, 255, 0.1);
+    color: #000000;
+}
+
+/* UI Content Styling */
+#ui-content h2 {
+    font-size: 36px;
+    margin-bottom: 20px;
+    color: #000000;
+    text-align: center;
+}
+
+#ui-content p {
+    font-size: 24px;
+    margin-bottom: 15px;
+    color: #333333;
+    text-align: center;
+}
+
+#ui-content button {
+    width: 100%;
+    padding: 25px;
+    font-size: 28px;
+    border-radius: 15px;
+    border: none;
+    background-color: #4CAF50;
+    color: #ffffff;
+    cursor: pointer;
+    margin-top: 20px;
+    transition: all 0.2s ease;
+    font-weight: 500;
+}
+
+#ui-content button:hover {
+    background-color: #45a049;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(76, 175, 80, 0.3);
+}
+
+#ui-content button:active {
+    transform: translateY(0);
+}
+
+/* Medication Card Styling */
+.medication-card {
+    background-color: #f5f5f5;
+    border-radius: 15px;
+    padding: 25px;
+    margin: 15px 0;
+    text-align: left;
+}
+
+.medication-card h3 {
+    font-size: 28px;
+    color: #2196F3;
+    margin-bottom: 10px;
+}
+
+.medication-card p {
+    font-size: 22px;
+    margin: 8px 0;
+    text-align: left;
+}
+
+/* Appointment Card Styling */
+.appointment-card {
+    background-color: #f5f5f5;
+    border-radius: 15px;
+    padding: 25px;
+    margin: 15px 0;
+    text-align: left;
+}
+
+.appointment-card h3 {
+    font-size: 28px;
+    color: #4CAF50;
+    margin-bottom: 10px;
+}
+
+.appointment-card p {
+    font-size: 22px;
+    margin: 8px 0;
+    text-align: left;
+}
+
+/* ==================== Onboarding Overlay ==================== */
+
+#onboarding-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: #000000;
+    z-index: 200;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.5s ease-in-out;
+}
+
+#onboarding-overlay.visible {
+    opacity: 1;
+    pointer-events: all;
+}
+
+#onboarding-overlay.hidden {
+    display: none;
+}
+
+#onboarding-circle-container {
+    width: 300px;
+    height: 300px;
+    margin-bottom: 60px;
+}
+
+#onboarding-visualizer {
+    width: 100%;
+    height: 100%;
+}
+
+#onboarding-main-circle {
+    transition: all 0.3s ease;
+}
+
+#onboarding-main-circle.listening {
+    r: 130;
+    stroke: #2196F3;
+    animation: listening-pulse 2s ease-in-out infinite;
+}
+
+#onboarding-main-circle.speaking {
+    stroke: #4CAF50;
+}
+
+#onboarding-pulse.active {
+    animation: pulse-wave 1.5s ease-out infinite;
+}
+
+.onboarding-text {
+    font-size: 32px;
+    color: #ffffff;
+    text-align: center;
+    max-width: 80%;
+    line-height: 1.6;
+}
+
+/* ==================== Toast Notifications ==================== */
+
+.toast {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    color: #ffffff;
+    padding: 20px 30px;
+    border-radius: 15px;
+    font-size: 20px;
+    z-index: 300;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+
+.toast.visible {
+    opacity: 1;
+}
+
+.toast.hidden {
+    display: none;
+}
+
+.toast.error {
+    background-color: rgba(244, 67, 54, 0.2);
+    border: 2px solid #F44336;
+}
+
+.toast.success {
+    background-color: rgba(76, 175, 80, 0.2);
+    border: 2px solid #4CAF50;
+}
+
+/* ==================== Accessibility ==================== */
+
+/* High contrast for accessibility */
+@media (prefers-contrast: high) {
+    .message {
+        font-size: 32px;
+        font-weight: 500;
+    }
+
+    #ui-content button {
+        border: 3px solid #000000;
+    }
+}
+
+/* Reduced motion for accessibility */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* ==================== Responsive Design ==================== */
+
+@media (max-width: 768px) {
+    #circle-container {
+        width: 250px;
+        height: 250px;
+    }
+
+    .message {
+        font-size: 24px;
+    }
+
+    .onboarding-text {
+        font-size: 28px;
+    }
+
+    #ui-content {
+        padding: 30px;
+    }
+
+    #ui-content h2 {
+        font-size: 30px;
+    }
+
+    #ui-content p {
+        font-size: 20px;
+    }
+
+    #ui-content button {
+        font-size: 24px;
+        padding: 20px;
+    }
+}
+
+@media (max-width: 480px) {
+    #circle-container {
+        width: 200px;
+        height: 200px;
+    }
+
+    .message {
+        font-size: 20px;
+    }
+
+    .voice-btn {
+        width: 70px;
+        height: 70px;
+        font-size: 30px;
+    }
+}

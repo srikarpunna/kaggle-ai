@@ -55,7 +55,12 @@ def get_or_create_agent(user_id: str = "margaret_thompson") -> ElderCareAgent:
 
 @app.route('/')
 def index():
-    """Main page."""
+    """Main page - Voice Mode Interface."""
+    return render_template('voice_mode.html')
+
+@app.route('/classic')
+def classic():
+    """Classic UI (for reference/testing)."""
     return render_template('index.html')
 
 
@@ -171,6 +176,60 @@ def health_check():
         'service': 'ElderCare Agent',
         'version': '1.0.0'
     }), 200
+
+
+@app.route('/api/session/profile', methods=['GET'])
+def get_profile():
+    """Get user profile from session."""
+    try:
+        profile = session.get('user_profile')
+
+        return jsonify({
+            'success': True,
+            'profile': profile
+        }), 200
+
+    except Exception as e:
+        logger.error(f"Error getting profile: {e}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+
+@app.route('/api/session/profile', methods=['POST'])
+def save_profile():
+    """Save user profile to session."""
+    try:
+        data = request.get_json()
+        name = data.get('name', '').strip()
+        age = data.get('age')
+
+        if not name or not age:
+            return jsonify({
+                'success': False,
+                'error': 'Name and age required'
+            }), 400
+
+        # Save to session
+        session['user_profile'] = {
+            'name': name,
+            'age': age
+        }
+
+        logger.info(f"Saved user profile: {name}, {age}")
+
+        return jsonify({
+            'success': True,
+            'profile': session['user_profile']
+        }), 200
+
+    except Exception as e:
+        logger.error(f"Error saving profile: {e}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
 
 
 @app.route('/api/debug', methods=['GET'])

@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ElderCare Agent - Voice Assistant</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/voice_mode.css') }}">
+</head>
+<body>
+    <!-- Main Voice Interface Container -->
+    <div id="voice-interface">
+
+        <!-- Animated Circle Visualizer -->
+        <div id="circle-container">
+            <svg id="audio-visualizer" width="300" height="300" viewBox="0 0 300 300">
+                <!-- Background circle -->
+                <circle id="bg-circle" cx="150" cy="150" r="140"
+                        fill="none" stroke="#333" stroke-width="2" opacity="0.3"/>
+
+                <!-- Frequency bars (40 bars around the circle) -->
+                <g id="frequency-bars"></g>
+
+                <!-- Main circle -->
+                <circle id="main-circle" cx="150" cy="150" r="120"
+                        fill="#1a1a1a" stroke="#4CAF50" stroke-width="3"/>
+
+                <!-- Pulse effect circle -->
+                <circle id="pulse-circle" cx="150" cy="150" r="120"
+                        fill="none" stroke="#4CAF50" stroke-width="2" opacity="0"/>
+            </svg>
+        </div>
+
+        <!-- Current Conversation Display -->
+        <div id="conversation-area">
+            <div id="user-message" class="message user-msg"></div>
+            <div id="agent-message" class="message agent-msg"></div>
+        </div>
+
+        <!-- Voice Controls (subtle, bottom corner) -->
+        <div id="voice-controls">
+            <button id="mic-button" class="voice-btn" title="Push to talk">
+                <span class="mic-icon">🎤</span>
+            </button>
+            <div id="status-text" class="status"></div>
+        </div>
+
+    </div>
+
+    <!-- Dynamic UI Overlay (for buttons, cards, etc.) -->
+    <div id="ui-overlay" class="hidden">
+        <button id="close-ui" class="close-btn" title="Close">✕</button>
+        <div id="ui-content"></div>
+    </div>
+
+    <!-- Onboarding Overlay -->
+    <div id="onboarding-overlay" class="hidden">
+        <div id="onboarding-circle-container">
+            <svg id="onboarding-visualizer" width="300" height="300" viewBox="0 0 300 300">
+                <circle cx="150" cy="150" r="140"
+                        fill="none" stroke="#333" stroke-width="2" opacity="0.3"/>
+                <g id="onboarding-bars"></g>
+                <circle id="onboarding-main-circle" cx="150" cy="150" r="120"
+                        fill="#1a1a1a" stroke="#2196F3" stroke-width="3"/>
+                <circle id="onboarding-pulse" cx="150" cy="150" r="120"
+                        fill="none" stroke="#2196F3" stroke-width="2" opacity="0"/>
+            </svg>
+        </div>
+        <div id="onboarding-message" class="onboarding-text"></div>
+    </div>
+
+    <!-- Error/Status Toast -->
+    <div id="toast" class="toast hidden"></div>
+
+    <!-- Scripts -->
+    <script src="{{ url_for('static', filename='js/voice_mode.js') }}"></script>
+    <script>
+        // Initialize the voice mode interface
+        const voiceUI = new VoiceModeUI();
+    </script>
+</body>
+</html>
