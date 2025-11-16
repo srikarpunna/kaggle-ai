@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ElderCare Agent - Demo</title>
+    <style>
+        /* Reset */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* CSS Variables */
+        :root {
+            --font-size-base: 24px;
+            --font-size-large: 32px;
+            --font-size-xlarge: 40px;
+            --button-height: 80px;
+            --spacing-sm: 12px;
+            --spacing-md: 24px;
+            --spacing-lg: 36px;
+            --color-primary: #4CAF50;
+            --color-primary-dark: #388E3C;
+            --color-secondary: #2196F3;
+            --color-text-primary: #212121;
+            --color-text-secondary: #757575;
+            --color-bg: #FAFAFA;
+            --color-surface: #FFFFFF;
+            --color-error: #F44336;
+            --border-radius: 16px;
+            --shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+            font-size: var(--font-size-base);
+            line-height: 1.6;
+            color: var(--color-text-primary);
+            background: var(--color-bg);
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: var(--spacing-md);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+            color: white;
+            padding: var(--spacing-lg);
+            border-radius: var(--border-radius);
+            text-align: center;
+            margin-bottom: var(--spacing-lg);
+            box-shadow: var(--shadow);
+        }
+
+        .app-title {
+            font-size: var(--font-size-xlarge);
+            font-weight: bold;
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .app-subtitle {
+            font-size: var(--font-size-base);
+            opacity: 0.95;
+        }
+
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-md);
+        }
+
+        .conversation-container {
+            background: var(--color-surface);
+            border-radius: var(--border-radius);
+            padding: var(--spacing-md);
+            min-height: 400px;
+            max-height: 500px;
+            overflow-y: auto;
+            box-shadow: var(--shadow);
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-md);
+        }
+
+        .message {
+            padding: var(--spacing-md);
+            border-radius: var(--border-radius);
+            animation: slideIn 0.3s ease-out;
+        }
+
+        .agent-message {
+            background: linear-gradient(135deg, #E3F2FD 0%, #BBDEFB 100%);
+            border-left: 4px solid var(--color-secondary);
+        }
+
+        .user-message {
+            background: linear-gradient(135deg, #F1F8E9 0%, #DCEDC8 100%);
+            border-left: 4px solid var(--color-primary);
+            align-self: flex-end;
+            max-width: 80%;
+        }
+
+        .help-list {
+            margin: var(--spacing-md) 0;
+            padding-left: var(--spacing-lg);
+        }
+
+        .help-list li {
+            margin: var(--spacing-sm) 0;
+            font-size: var(--font-size-base);
+        }
+
+        .ui-container {
+            background: var(--color-surface);
+            border-radius: var(--border-radius);
+            padding: var(--spacing-md);
+            box-shadow: var(--shadow);
+            min-height: 200px;
+        }
+
+        .ui-card {
+            background: linear-gradient(135deg, #FFF9C4 0%, #FFF59D 100%);
+            border: 3px solid #FBC02D;
+            border-radius: var(--border-radius);
+            padding: var(--spacing-lg);
+            text-align: center;
+        }
+
+        .ui-card h2 {
+            font-size: var(--font-size-large);
+            margin-bottom: var(--spacing-md);
+        }
+
+        .ui-card p {
+            margin: var(--spacing-sm) 0;
+            font-size: var(--font-size-base);
+        }
+
+        .action-button {
+            width: 100%;
+            height: var(--button-height);
+            border: none;
+            border-radius: var(--border-radius);
+            font-size: var(--font-size-large);
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: var(--spacing-md);
+            transition: all 0.2s ease;
+            box-shadow: var(--shadow);
+        }
+
+        .action-button-success {
+            background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+            color: white;
+        }
+
+        .action-button-success:hover {
+            transform: scale(1.02);
+            box-shadow: 0 6px 16px rgba(0,0,0,0.2);
+        }
+
+        .input-container {
+            background: var(--color-surface);
+            border-radius: var(--border-radius);
+            padding: var(--spacing-md);
+            box-shadow: var(--shadow);
+        }
+
+        .voice-button {
+            width: 100%;
+            height: var(--button-height);
+            background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+            color: white;
+            border: none;
+            border-radius: var(--border-radius);
+            font-size: var(--font-size-large);
+            font-weight: bold;
+            cursor: pointer;
+            margin-bottom: var(--spacing-md);
+            transition: all 0.2s ease;
+            box-shadow: var(--shadow);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--spacing-md);
+        }
+
+        .voice-button:hover {
+            transform: scale(1.02);
+            box-shadow: 0 6px 16px rgba(0,0,0,0.2);
+        }
+
+        .voice-button.listening {
+            background: linear-gradient(135deg, var(--color-error) 0%, #C62828 100%);
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        .text-input-container {
+            display: flex;
+            gap: var(--spacing-md);
+        }
+
+        .text-input {
+            flex: 1;
+            height: 60px;
+            padding: 0 var(--spacing-md);
+            font-size: var(--font-size-base);
+            border: 3px solid #E0E0E0;
+            border-radius: var(--border-radius);
+        }
+
+        .send-button {
+            width: 80px;
+            height: 60px;
+            background: var(--color-secondary);
+            color: white;
+            border: none;
+            border-radius: var(--border-radius);
+            font-size: var(--font-size-large);
+            cursor: pointer;
+        }
+
+        .footer {
+            display: flex;
+            gap: var(--spacing-md);
+            margin-top: var(--spacing-md);
+        }
+
+        .footer-button {
+            flex: 1;
+            height: 60px;
+            background: var(--color-surface);
+            border: 2px solid #E0E0E0;
+            border-radius: var(--border-radius);
+            font-size: 20px;
+            cursor: pointer;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .demo-banner {
+            background: linear-gradient(135deg, #FF9800 0%, #F57C00 100%);
+            color: white;
+            padding: var(--spacing-md);
+            border-radius: var(--border-radius);
+            text-align: center;
+            margin-bottom: var(--spacing-md);
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Demo Banner -->
+        <div class="demo-banner">
+            📱 DEMO MODE - UI Preview (Voice & AI features require Flask server)
+        </div>
+
+        <!-- Header -->
+        <header class="header">
+            <h1 class="app-title">🏥 ElderCare Agent</h1>
+            <p class="app-subtitle">Your friendly AI assistant</p>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Conversation Display -->
+            <div class="conversation-container" id="conversation">
+                <!-- Welcome Message -->
+                <div class="message agent-message">
+                    <div class="message-content">
+                        <p class="message-text">
+                            👋 Hello! I'm your ElderCare assistant.
+                            I can help you with:
+                        </p>
+                        <ul class="help-list">
+                            <li>📞 Calling family and friends</li>
+                            <li>💊 Medication reminders</li>
+                            <li>📅 Doctor appointments</li>
+                        </ul>
+                        <p class="message-text">
+                            Just speak or type what you need!
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Example User Message -->
+                <div class="message user-message">
+                    <p>"Call my son"</p>
+                </div>
+
+                <!-- Example Agent Response -->
+                <div class="message agent-message">
+                    <p>Of course! I'll help you call John. Let me get that set up for you...</p>
+                </div>
+            </div>
+
+            <!-- UI Display Area - Example Call Button -->
+            <div class="ui-container">
+                <div class="ui-card">
+                    <h2>📞 John Thompson</h2>
+                    <p><strong>Son</strong></p>
+                    <p>+1-555-0101</p>
+                    <button class="action-button action-button-success" onclick="alert('In the real app, this would start a WhatsApp video call!')">
+                        📞 Start Call
+                    </button>
+                </div>
+            </div>
+
+            <!-- Input Area -->
+            <div class="input-container">
+                <!-- Voice Input Button -->
+                <button class="voice-button" id="voiceButton" onclick="toggleListening()">
+                    <span class="voice-icon" id="voiceIcon">🎤</span>
+                    <span class="voice-text" id="voiceText">Tap to Speak</span>
+                </button>
+
+                <!-- Text Input (fallback) -->
+                <div class="text-input-container">
+                    <input
+                        type="text"
+                        id="textInput"
+                        class="text-input"
+                        placeholder="Or type your message here..."
+                        onkeypress="if(event.key==='Enter') sendMessage()">
+                    <button class="send-button" onclick="sendMessage()">
+                        ➤
+                    </button>
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <button class="footer-button" onclick="alert('This would show conversation history')">📜 View History</button>
+            <button class="footer-button" onclick="alert('This would end the session')">🚪 End Session</button>
+        </footer>
+    </div>
+
+    <script>
+        let isListening = false;
+
+        function toggleListening() {
+            const button = document.getElementById('voiceButton');
+            const icon = document.getElementById('voiceIcon');
+            const text = document.getElementById('voiceText');
+
+            isListening = !isListening;
+
+            if (isListening) {
+                button.classList.add('listening');
+                icon.textContent = '🔴';
+                text.textContent = 'Listening...';
+
+                // Simulate listening for 2 seconds
+                setTimeout(() => {
+                    toggleListening();
+                    addMessage('user', 'Did I take my medication?');
+                    setTimeout(() => {
+                        addMessage('agent', 'Let me check your medication schedule...');
+                        showMedicationUI();
+                    }, 1000);
+                }, 2000);
+            } else {
+                button.classList.remove('listening');
+                icon.textContent = '🎤';
+                text.textContent = 'Tap to Speak';
+            }
+        }
+
+        function sendMessage() {
+            const input = document.getElementById('textInput');
+            const message = input.value.trim();
+
+            if (message) {
+                addMessage('user', message);
+                input.value = '';
+
+                // Simulate agent response
+                setTimeout(() => {
+                    addMessage('agent', 'I understand you want to: ' + message);
+                }, 500);
+            }
+        }
+
+        function addMessage(type, text) {
+            const conversation = document.getElementById('conversation');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${type}-message`;
+            messageDiv.innerHTML = `<p>${text}</p>`;
+            conversation.appendChild(messageDiv);
+            conversation.scrollTop = conversation.scrollHeight;
+        }
+
+        function showMedicationUI() {
+            const uiContainer = document.querySelector('.ui-container');
+            uiContainer.innerHTML = `
+                <div class="ui-card" style="background: linear-gradient(135deg, #FFE0B2 0%, #FFCC80 100%); border-color: #FF9800;">
+                    <h2>💊 Lisinopril</h2>
+                    <p><strong>10 mg</strong></p>
+                    <p>For blood pressure control</p>
+                    <p style="color: #E65100; font-weight: bold;">⏰ Due at 9:00 AM</p>
+                    <button class="action-button action-button-success" onclick="alert('Medication logged!')">
+                        ✅ I Took It
+                    </button>
+                </div>
+            `;
+        }
+    </script>
+</body>
+</html>
