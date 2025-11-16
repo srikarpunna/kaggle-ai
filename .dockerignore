@@ -1,0 +1,71 @@
+# ElderCare Agent - Docker Ignore File
+# Exclude unnecessary files from Docker image
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+dist/
+build/
+
+# Virtual environments
+venv/
+env/
+ENV/
+.venv
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# Documentation
+*.md
+docs/
+README.md
+CONTRIBUTING.md
+
+# Tests (exclude from production image)
+tests/__pycache__/
+*.pytest_cache/
+.coverage
+htmlcov/
+
+# Logs
+logs/*.log
+*.log
+
+# Environment files
+.env
+.env.local
+.env.production
+
+# Development files
+docker-compose.override.yml
+.dockerignore
+Dockerfile.dev
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# OS files
+Thumbs.db
+Desktop.ini
+
+# Jupyter notebooks (if any)
+*.ipynb_checkpoints/
+
+# Large data files (add specific paths if needed)
+# data/large_dataset.csv

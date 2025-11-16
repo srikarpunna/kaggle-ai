@@ -1,0 +1,54 @@
+# ElderCare Agent - Docker Compose Configuration
+# For local development and testing
+
+version: '3.8'
+
+services:
+  eldercare-agent:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: eldercare-agent
+    ports:
+      - "8080:8080"
+    environment:
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - FLASK_ENV=development
+      - FLASK_DEBUG=1
+      - PORT=8080
+    volumes:
+      # Mount source code for hot reload in development
+      - ./src:/app/src
+      - ./config:/app/config
+      - ./data:/app/data
+      - ./logs:/app/logs
+    networks:
+      - eldercare-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Optional: Add a monitoring service
+  # metrics-dashboard:
+  #   image: grafana/grafana:latest
+  #   container_name: eldercare-metrics
+  #   ports:
+  #     - "3000:3000"
+  #   environment:
+  #     - GF_SECURITY_ADMIN_PASSWORD=admin
+  #   volumes:
+  #     - grafana-storage:/var/lib/grafana
+  #   networks:
+  #     - eldercare-network
+  #   restart: unless-stopped
+
+networks:
+  eldercare-network:
+    driver: bridge
+
+# volumes:
+#   grafana-storage:
