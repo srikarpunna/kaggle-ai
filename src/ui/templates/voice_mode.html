@@ -66,6 +66,21 @@
             </svg>
         </div>
         <div id="onboarding-message" class="onboarding-text"></div>
+        <button id="start-voice-btn" class="start-voice-button" style="
+            display: none;
+            position: absolute;
+            bottom: 50px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 18px;
+            border-radius: 30px;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        ">🔊 Click to Enable Voice</button>
     </div>
 
     <!-- Error/Status Toast -->
@@ -73,9 +88,6 @@
 
     <!-- Scripts -->
     <script src="{{ url_for('static', filename='js/voice_mode.js') }}"></script>
-    <script>
-        // Initialize the voice mode interface
-        const voiceUI = new VoiceModeUI();
-    </script>
+    <!-- VoiceModeUI auto-initializes in voice_mode.js -->
 </body>
 </html>

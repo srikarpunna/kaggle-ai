@@ -201,6 +201,32 @@ class VoiceModeUI {
         }
     }
 
+    async waitForUserInteraction() {
+        return new Promise((resolve) => {
+            const startBtn = document.getElementById('start-voice-btn');
+            
+            // Show the button
+            if (startBtn) {
+                startBtn.style.display = 'block';
+                
+                startBtn.onclick = () => {
+                    console.log('User clicked to enable voice');
+                    startBtn.style.display = 'none';
+                    
+                    // Play a silent sound to initialize audio context
+                    const utterance = new SpeechSynthesisUtterance('');
+                    this.synthesis.speak(utterance);
+                    
+                    resolve();
+                };
+            } else {
+                // Fallback if button not found
+                console.warn('Start voice button not found');
+                resolve();
+            }
+        });
+    }
+
     async startOnboarding() {
         console.log('Starting onboarding...');
 
@@ -209,6 +235,9 @@ class VoiceModeUI {
         setTimeout(() => {
             this.elements.onboardingOverlay.classList.add('visible');
         }, 100);
+
+        // Wait for user interaction to enable audio
+        await this.waitForUserInteraction();
 
         // Step 1: Ask for name
         await this.sleep(1000);
@@ -275,15 +304,40 @@ class VoiceModeUI {
             const utterance = new SpeechSynthesisUtterance(text);
             utterance.rate = 0.9;
             utterance.pitch = 1.0;
+            utterance.volume = 1.0;
+
+            utterance.onstart = () => {
+                console.log('Speaking:', text);
+            };
 
             utterance.onend = () => {
+                console.log('Finished speaking');
                 this.elements.onboardingCircle.classList.remove('speaking');
                 this.elements.onboardingPulse.classList.remove('active');
                 this.stopOnboardingBarsAnimation();
                 resolve();
             };
 
-            this.synthesis.speak(utterance);
+            utterance.onerror = (event) => {
+                console.error('Speech synthesis error:', event.error);
+                // If speech fails, still resolve after text is displayed
+                setTimeout(() => {
+                    this.elements.onboardingCircle.classList.remove('speaking');
+                    this.elements.onboardingPulse.classList.remove('active');
+                    this.stopOnboardingBarsAnimation();
+                    resolve();
+                }, 2000);
+            };
+
+            // Try to speak
+            try {
+                this.synthesis.cancel(); // Clear any pending speech
+                this.synthesis.speak(utterance);
+                console.log('Speech synthesis started');
+            } catch (error) {
+                console.error('Failed to start speech:', error);
+                setTimeout(resolve, 2000);
+            }
         });
     }
 
@@ -696,3 +750,4 @@ if (document.readyState === 'loading') {
 } else {
     window.voiceUI = new VoiceModeUI();
 }
+

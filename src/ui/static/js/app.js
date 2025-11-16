@@ -449,10 +449,8 @@ class ElderCareApp {
     showWelcomeMessage() {
         this.addMessage('agent', 'Hello! I\'m your ElderCare assistant. I can help you call family, manage medications, and schedule doctor appointments. How can I help you today?');
 
-        // Speak welcome message
-        if (this.speechManager) {
-            this.speechManager.speak('Hello! I\'m your ElderCare assistant. How can I help you today?');
-        }
+        // Don't auto-speak on page load (browsers block autoplay audio)
+        // Speech will work after user first interaction
     }
 }
 
