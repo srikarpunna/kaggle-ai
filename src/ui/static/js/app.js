@@ -217,33 +217,47 @@ class ElderCareApp {
      * Render dynamic UI from agent response
      */
     renderDynamicUI(uiConfig) {
+        console.log('Rendering dynamic UI:', uiConfig);
+
         // Clear existing UI
         this.elements.uiContainer.innerHTML = '';
 
-        const templateName = uiConfig.template_name;
+        // Use template_id (not template_name)
+        const templateId = uiConfig.template_id;
 
-        if (templateName === 'call_ui') {
-            this.renderCallUI(uiConfig.data);
-        } else if (templateName === 'medication_ui') {
-            this.renderMedicationUI(uiConfig.data);
-        } else if (templateName === 'appointment_ui') {
-            this.renderAppointmentUI(uiConfig.data);
+        if (templateId === 'call_ui') {
+            this.renderCallUI(uiConfig);
+        } else if (templateId === 'medication_ui') {
+            this.renderMedicationUI(uiConfig);
+        } else if (templateId === 'appointment_ui') {
+            this.renderAppointmentUI(uiConfig);
+        } else {
+            console.error('Unknown template ID:', templateId);
         }
     }
 
     /**
      * Render call UI
      */
-    renderCallUI(data) {
+    renderCallUI(uiConfig) {
         const card = document.createElement('div');
         card.className = 'ui-card';
 
+        // Extract elements from ui_config
+        const elements = uiConfig.ui_config.elements;
+
+        // Find the data we need from elements
+        const contactName = elements.find(e => e.id === 'contact_name')?.content || 'Contact';
+        const relationship = elements.find(e => e.id === 'relationship')?.content || '';
+        const photoSrc = elements.find(e => e.id === 'contact_photo')?.src || '';
+        const callButton = elements.find(e => e.id === 'call_button');
+
         card.innerHTML = `
-            ${data.contact.photo_url ? `<img src="${data.contact.photo_url}" alt="${data.contact.contact_name}">` : ''}
-            <h2>${data.contact.contact_name}</h2>
-            <p>${data.contact.relationship}</p>
-            <button class="action-button action-button-success" onclick="window.open('${data.deep_link}', '_blank')">
-                📞 Start Call
+            ${photoSrc ? `<img src="${photoSrc}" alt="${contactName}" style="width: 120px; height: 120px; border-radius: 50%; margin-bottom: 16px;">` : ''}
+            <h2 style="font-size: 32px; font-weight: bold; margin-bottom: 8px;">${contactName}</h2>
+            <p style="font-size: 24px; color: #666; margin-bottom: 32px;">${relationship}</p>
+            <button class="action-button action-button-success" onclick="window.open('${callButton.url}', '_blank')" style="width: 100%; height: 80px; font-size: 28px; background: #4CAF50; color: white; border: none; border-radius: 12px; cursor: pointer;">
+                📞 Video Call
             </button>
         `;
 
@@ -253,19 +267,29 @@ class ElderCareApp {
     /**
      * Render medication reminder UI
      */
-    renderMedicationUI(data) {
+    renderMedicationUI(uiConfig) {
         const card = document.createElement('div');
         card.className = 'ui-card';
 
+        // Extract elements from ui_config
+        const elements = uiConfig.ui_config.elements;
+
+        // Find the data we need
+        const medName = elements.find(e => e.id === 'medication_name')?.content || 'Medication';
+        const dosage = elements.find(e => e.id === 'dosage')?.content || '';
+        const instructions = elements.find(e => e.id === 'instructions')?.content || '';
+        const photoSrc = elements.find(e => e.id === 'medication_image')?.src || '';
+        const takeButton = elements.find(e => e.id === 'take_button');
+
         card.innerHTML = `
-            ${data.medication.image_url ? `<img src="${data.medication.image_url}" alt="${data.medication.medication_name}">` : ''}
-            <h2>${data.medication.medication_name}</h2>
-            <p>${data.medication.dosage}</p>
-            <p>${data.medication.instructions || ''}</p>
-            <button class="action-button action-button-success" onclick="app.logMedicationTaken(${data.medication.medication_id})">
+            ${photoSrc ? `<img src="${photoSrc}" alt="${medName}" style="width: 100px; height: 100px; margin-bottom: 16px;">` : ''}
+            <h2 style="font-size: 32px; font-weight: bold; margin-bottom: 8px;">${medName}</h2>
+            <p style="font-size: 24px; color: #666; margin-bottom: 8px;">${dosage}</p>
+            <p style="font-size: 20px; color: #666; margin-bottom: 32px;">${instructions}</p>
+            <button class="action-button action-button-success" onclick="alert('Medication logged!')" style="width: 100%; height: 80px; font-size: 28px; background: #4CAF50; color: white; border: none; border-radius: 12px; cursor: pointer; margin-bottom: 12px;">
                 ✅ I Took It
             </button>
-            <button class="action-button action-button-secondary" onclick="app.skipMedication(${data.medication.medication_id})">
+            <button class="action-button action-button-secondary" onclick="alert('Skipped')" style="width: 100%; height: 60px; font-size: 24px; background: #F5F5F5; color: #666; border: none; border-radius: 8px; cursor: pointer;">
                 ⏭️ Skip
             </button>
         `;
@@ -276,17 +300,27 @@ class ElderCareApp {
     /**
      * Render appointment UI
      */
-    renderAppointmentUI(data) {
+    renderAppointmentUI(uiConfig) {
         const card = document.createElement('div');
         card.className = 'ui-card';
 
+        // Extract elements from ui_config
+        const elements = uiConfig.ui_config.elements;
+
+        // Find the data we need
+        const title = elements.find(e => e.id === 'title')?.content || 'Appointment';
+        const doctorName = elements.find(e => e.id === 'doctor_name')?.content || '';
+        const date = elements.find(e => e.id === 'date')?.content || '';
+        const time = elements.find(e => e.id === 'time')?.content || '';
+        const location = elements.find(e => e.id === 'location')?.content || '';
+
         card.innerHTML = `
-            <h2>📅 ${data.appointment.title}</h2>
-            <p><strong>Doctor:</strong> ${data.appointment.doctor_name}</p>
-            <p><strong>Date:</strong> ${data.appointment.date}</p>
-            <p><strong>Time:</strong> ${data.appointment.time}</p>
-            <p><strong>Location:</strong> ${data.appointment.location}</p>
-            <button class="action-button action-button-primary" onclick="app.confirmAppointment(${data.appointment.appointment_id})">
+            <h2 style="font-size: 32px; font-weight: bold; margin-bottom: 16px;">📅 ${title}</h2>
+            <p style="font-size: 24px; margin-bottom: 8px;"><strong>Doctor:</strong> ${doctorName}</p>
+            <p style="font-size: 24px; margin-bottom: 8px;"><strong>Date:</strong> ${date}</p>
+            <p style="font-size: 24px; margin-bottom: 8px;"><strong>Time:</strong> ${time}</p>
+            <p style="font-size: 24px; margin-bottom: 32px;"><strong>Location:</strong> ${location}</p>
+            <button class="action-button action-button-primary" onclick="alert('Appointment confirmed!')" style="width: 100%; height: 80px; font-size: 28px; background: #2196F3; color: white; border: none; border-radius: 12px; cursor: pointer;">
                 ✅ Confirm
             </button>
         `;
