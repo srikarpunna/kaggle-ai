@@ -46,7 +46,7 @@ class LLMJudge:
             raise ValueError("GEMINI_API_KEY not found")
 
         genai.configure(api_key=self.api_key)
-        self.model = genai.GenerativeModel('gemini-2.5-flash-preview-04-17')
+        self.model = genai.GenerativeModel('gemini-2.5-flash')
 
         # Quality thresholds
         self.min_clarity_score = 7.0

@@ -197,8 +197,9 @@ ONLY for non-urgent issues (regular checkup, mild symptoms, scheduled visit):
 2. Ask what kind of doctor they need (if not clear)
 3. Ask when they're free (get 2-3 dates)
 4. Ask what time works (morning/afternoon)
-5. Ask if they need a ride
-6. When you have ALL info, call the book_appointment function
+5. **MUST ASK: "Do you need a ride to the appointment?"** - REQUIRED before booking
+6. When you have ALL 5 pieces of info, call the book_appointment function
+**DO NOT call book_appointment until you've asked about transportation!**
 
 ### For Calls:
 When someone says "call my son", "call my daughter", "call John", etc.:
