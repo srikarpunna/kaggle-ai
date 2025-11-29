@@ -1,14 +1,12 @@
-# 🏥 ElderCare Agent - AI for Good
+# 🏥 ElderCare Agent
 
-**Track:** Agents for Good
-**Competition:** Kaggle AI Agents Intensive - Capstone Project 2024
-**Status:** 🏆 Production-Ready | TOP 3 Contender
+**A voice-first AI assistant built to help elderly people stay connected, healthy, and independent.**
 
-A production-grade, multi-agent AI system designed to help elderly people (65+) with video calls, medication reminders, and doctor appointments through a voice-first interface.
+I built this system because I saw my grandparents struggling with technology—too many buttons, confusing apps, and interfaces that weren't designed for them. So I created an AI agent that just listens and helps.
 
 ---
 
-## 🎯 The Problem
+## 🎯 The Problem I'm Solving
 
 **52 million seniors in America struggle with technology:**
 - 67% can't use smartphones effectively
@@ -16,36 +14,35 @@ A production-grade, multi-agent AI system designed to help elderly people (65+) 
 - 67% miss medications regularly
 - 30% miss doctor appointments
 
-**Current solutions fall short:** Apps are too complex with tiny buttons, confusing menus, and technical jargon.
+**Current solutions fall short:** Apps have tiny buttons, confusing menus, and require too many steps.
 
 ---
 
-## 💡 Our Solution
+## 💡 My Solution
 
-**"Just talk. We handle the rest."**
+**"Just talk. I'll handle the rest."**
 
-ElderCare Agent is a voice-first AI assistant that:
-- 🗣️ **Voice-first interaction** - ChatGPT-style interface with animated circle
-- 📱 **Adaptive UI** - Large buttons appear only when needed
-- 🔤 **Accessibility** - 100% WCAG AA compliant, designed for 65+
-- 🧠 **Multi-agent system** - 5 specialized agents working together
-- 🔗 **Real integrations** - A2A Protocol with pharmacies and doctor offices
-- 🛡️ **Safety-first** - Human-in-the-Loop review system
+ElderCare Agent is a voice-first AI that:
+- 🗣️ **Listens continuously** - No repeated button pressing
+- 📱 **Shows simple UI** - Large buttons appear only when needed
+- 🔤 **Built for accessibility** - WCAG AA compliant, designed for 65+
+- 🧠 **Uses LLM intelligence** - Natural conversation with Gemini
+- 🚨 **Handles emergencies** - Immediate 911 for urgent situations
+- 🛡️ **Privacy-focused** - All data stored locally in SQLite
 
 ---
 
-## ✨ Core Features
+## ✨ What It Can Do
 
-### 1. Video Calling Family
+### 1. Video Call Family & Friends
 ```
 User: "Call my son"
-Agent: "I'd be happy to help you call John. Is that correct?"
-User: "Yes"
-Agent: [Shows large VIDEO CALL button] → WhatsApp opens
+Agent: "I'll call John for you."
+→ [Shows large VIDEO CALL button] → WhatsApp opens
 ```
-- Platform-specific deep links (WhatsApp, FaceTime, Phone)
-- Relationship-aware ("my grandson" = Tim)
-- Confirmation before calling
+- Finds contacts by name or relationship ("my grandson")
+- Works with WhatsApp, FaceTime, and regular phone
+- Confirms before calling
 
 ### 2. Medication Management
 ```
@@ -54,230 +51,127 @@ Agent: [Shows clear card]
   💊 Lisinopril - 10mg at 9:00 AM
   💊 Metformin - 500mg at 8:00 AM, 6:00 PM
 ```
-- Automatic reminders
-- Adherence tracking
-- **A2A Protocol** → Pharmacy refills
+- Tracks medication schedule
+- Sends reminders
+- Records when medications are taken
 
 ### 3. Doctor Appointments
 ```
-User: "I need to see Dr. Smith next Tuesday morning"
-Agent: [Schedules appointment]
-  ✓ Appointment confirmed for Tuesday 10:30 AM
-  [Google Calendar event created]
+User: "I need to see the doctor next Tuesday morning"
+Agent: "Got it. I'll schedule that for Tuesday at 10:30 AM."
+→ [Appointment confirmed, calendar updated]
 ```
-- Natural language date/time parsing
-- **A2A Protocol** → Doctor office scheduling
-- Automatic reminders
+- Understands natural date/time ("next Tuesday", "tomorrow afternoon")
+- Asks relevant follow-ups (symptoms, transportation needs)
+- Saves to calendar
+
+### 4. Emergency Support
+```
+User: "Emergency"
+Agent: "🚨 Calling 911 immediately."
+→ [Emergency call UI appears instantly]
+```
+- No questions asked for emergencies
+- Immediate action
+- Life-saving feature
 
 ---
 
-## 🏗️ Technical Architecture
+## 🏗️ How I Built It
 
-### Complete System Architecture
+### Architecture Overview
+
+I designed this with a **clean LLM-first architecture** using Gemini's function calling:
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│              Voice-First UI (ChatGPT-style)                  │
-│  - Animated circle (300px, frequency bars)                  │
-│  - Word-by-word typing effect                               │
-│  - Voice input/output (Web Speech API)                      │
-└────────────┬────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────┐
+│              Voice-First UI (ChatGPT-style)              │
+│  - Continuous listening (Web Speech API)                │
+│  - Text-to-speech responses                             │
+│  - Large, accessible buttons                            │
+└────────────┬────────────────────────────────────────────┘
              │
-┌────────────▼──────────────────────────────────────────────┐
-│              ORCHESTRATOR AGENT (Router)                   │
-│  - Intent classification (Gemini 2.0 Flash)               │
-│  - Confidence scoring                                      │
-│  - Confirmation handling                                   │
-└──┬────┬────┬────┬────────────────────────────────────────┘
-   │    │    │    │
-   ▼    ▼    ▼    ▼
-┌────┬────┬────┬────┬──────────────────────────────────────┐
-│Comm│Health│Mem│UI  │  Specialized Agents                │
-│ 📞 │  💊  │🧠 │ 🎨 │                                     │
-└────┴────┴────┴────┴──────────────────────────────────────┘
-   │    │    │    │
-   ▼    ▼    ▼    ▼
-┌────────────────────────────────────────────────────────────┐
-│            MCP SERVERS (Model Context Protocol)             │
-│  Contacts │ Health │ Calendar │                            │
-└────────────────────────────────────────────────────────────┘
-   │         │        │
-   ▼         ▼        ▼
-┌────────────────────────────────────────────────────────────┐
-│         A2A PROTOCOL (Agent-to-Agent Communication)         │
-│  Pharmacy Agents │ Doctor Agents │ Emergency Services      │
-└────────────────────────────────────────────────────────────┘
-   │         │        │
-   ▼         ▼        ▼
-┌────────────────────────────────────────────────────────────┐
-│                   CROSS-CUTTING CONCERNS                     │
-│  Observability│LLM-as-Judge│HITL│Session Manager│Metrics  │
-└────────────────────────────────────────────────────────────┘
+┌────────────▼────────────────────────────────────────────┐
+│         CONVERSATIONAL AGENT (Gemini 2.5 Flash)         │
+│  - Natural language understanding                       │
+│  - Function calling for actions                         │
+│  - Context & conversation memory                        │
+│  - Task state management                                │
+└──┬──────┬──────┬──────┬────────────────────────────────┘
+   │      │      │      │
+   ▼      ▼      ▼      ▼
+┌──────┬──────┬──────┬──────┐
+│ Call │ Book │ Meds │ 911  │  Function Calls
+│      │ Appt │      │      │
+└──────┴──────┴──────┴──────┘
+   │      │      │      │
+   ▼      ▼      ▼      ▼
+┌─────────────────────────────────────────────────────────┐
+│            MCP SERVERS (Data Access Layer)              │
+│  Contacts DB │ Health DB │ Calendar DB │ Sessions      │
+└─────────────────────────────────────────────────────────┘
 ```
 
-### 5 Specialized Agents
+### Core Components
 
-1. **Orchestrator Agent** (Gemini 2.0 Flash)
-   - Intent classification: CALL, MEDICATION, APPOINTMENT, UNCLEAR
-   - Confidence scoring (0-1)
-   - Context-aware routing
+**1. ConversationalAgent** (`src/agents/conversational_agent.py`)
+- Main brain of the system
+- Uses Gemini for natural language understanding
+- Implements function calling for actions:
+  - `book_appointment` - Schedules doctor visits
+  - `make_call` - Initiates video/phone calls
+  - `check_medication` - Manages medication info
+  - `call_emergency_services` - Handles 911 calls
+- Maintains conversation context and task state
 
-2. **Communication Agent**
-   - Contact lookup with fuzzy matching
-   - Deep link generation (WhatsApp, FaceTime, Phone)
-   - Relationship mapping
+**2. MCP Servers** (Model Context Protocol)
+- `contacts_server.py` - Manages family/friend contacts
+- `health_server.py` - Handles medications and health data
+- `calendar_server.py` - Appointment scheduling
+- All backed by SQLite databases
 
-3. **Health Agent**
-   - Medication schedule management
-   - Adherence tracking
-   - Appointment scheduling
-   - **A2A integration** with pharmacies/doctors
+**3. Supporting Systems**
+- `MemoryAgent` - Logs all interactions
+- `UIGeneratorAgent` - Creates accessible UI templates
+- `SessionManager` - Tracks conversation state
+- `Database` - SQLite for data persistence
 
-4. **Memory Agent**
-   - Session management
-   - User preferences
-   - Conversation history
-   - Long-term memory (SQLite)
-
-5. **UI Generator Agent**
-   - Accessible UI templates
-   - WCAG AA compliance
-   - Large fonts (28px+), high contrast
-   - Dynamic button generation
-
----
-
-## 🚀 Day 4 & 5: Production Features
-
-### Day 4 - Agent Quality ✅
-
-**1. Observability System**
-- Structured logging with trace IDs
-- Distributed tracing across all 5 agents
-- Real-time metrics dashboard
-- Performance monitoring (response time, success rate, token usage)
-
-**2. Metrics Collector**
-- Response time histograms (p50, p95, p99)
-- Agent-specific metrics
-- Intent distribution analytics
-- Cache hit rate tracking
-
-**3. LLM-as-a-Judge Evaluation** ⭐ **GAME CHANGER**
-- Uses Gemini to evaluate response quality
-- 5 criteria: Clarity, Empathy, Accuracy, Accessibility, Safety
-- Scores 0-10 for each criterion
-- **Result: 9.5/10 empathy score** (vs. 6.5/10 for generic chatbots!)
-
-**4. Comprehensive Test Scenarios**
-- 35+ automated test cases
-- Call scenarios (6 tests)
-- Medication scenarios (6 tests)
-- Appointment scenarios (6 tests)
-- Accessibility tests (3 tests)
-- **100% intent accuracy**
-
-**5. Human-in-the-Loop (HITL) System**
-- Flags emergency keywords, low confidence, medical advice
-- Priority levels: Critical, High, Medium, Low
-- Review queue management
-- Approval/rejection workflow
-
-### Day 5 - Prototype to Production ✅
-
-**6. A2A Protocol (Agent-to-Agent)** ⭐⭐ **MAJOR DIFFERENTIATOR**
-- Full Agent-to-Agent communication protocol
-- Pharmacy agents (medication refill, price check)
-- Doctor office agents (scheduling, rescheduling)
-- Emergency services (family notification)
+**4. A2A Protocol** (`src/a2a/`)
+- Agent-to-agent communication
+- Connects with external agents (pharmacy, doctor offices)
 - Standardized message format
 
-**Example A2A Flow:**
-```
-User: "I need to refill my blood pressure medication"
-→ ElderCare Agent (Health Agent)
-→ A2A Protocol
-→ Pharmacy Agent (CVS)
-→ Response: "Refill approved, ready at 3:00 PM, $12.50"
-Total: 1,650ms ✅
-```
-
-**7. Production Deployment**
-- Dockerfile + docker-compose
-- Google Cloud Run deployment
-- Auto-scaling (0-10 instances)
-- Health checks + monitoring
-
 ---
 
-## 📊 Evaluation Results
-
-### Production Readiness: 10/10 ✅
-
-| Metric | Target | Actual | Status |
-|--------|--------|--------|--------|
-| Intent Accuracy | >95% | **100%** | ✅ EXCEEDS |
-| Task Completion | >90% | **94%** | ✅ PASS |
-| Response Time | <2000ms | **1,847ms** | ✅ PASS |
-| LLM Judge Overall | >7.5 | **9.2/10** | ✅ EXCELLENT |
-| Empathy Score | >7.0 | **9.5/10** | ✅ OUTSTANDING |
-| Safety Score | >9.0 | **10.0/10** | ✅ PERFECT |
-| WCAG AA Compliance | 100% | **100%** | ✅ PASS |
-| A2A Integration | Working | **100%** | ✅ PASS |
-
-### Key Achievements
-
-- ✅ **100% Intent Accuracy** - Exceeds 95% target
-- ✅ **9.5/10 Empathy** - Outstanding warmth and care
-- ✅ **10/10 Safety** - Perfect safety compliance
-- ✅ **100% WCAG AA** - Fully accessible
-- ✅ **A2A Protocol** - Real external agent integration
-- ✅ **Zero Infinite Loops** - All confirmations work correctly
-
----
-
-## 🛠️ Tech Stack (100% FREE)
-
-| Component | Technology | Cost |
-|-----------|-----------|------|
-| LLM | Gemini 2.0 Flash Exp | FREE (60 req/min) |
-| Speech | Web Speech API | FREE (Browser) |
-| Backend | Python 3.11 + Flask | FREE |
-| Database | SQLite 3 | FREE |
-| Frontend | HTML5, CSS3, Vanilla JS | FREE |
-| Deployment | Google Cloud Run | FREE (2M req/month) |
-| MCP | 3 custom servers | FREE |
-| A2A | Custom protocol | FREE |
-
-**No paid APIs. No mocking. 100% real implementation.**
-
----
-
-## 🚀 Quick Start
+## 🚀 Getting Started
 
 ### Prerequisites
 
-- Python 3.11+
+- Python 3.9+
 - Google AI Studio API key ([Get FREE key](https://makersuite.google.com/app/apikey))
 
 ### Installation
 
 ```bash
-# 1. Clone repository
-git clone https://github.com/srikarpunna/kaggle-ai.git
-cd kaggle-ai
+# 1. Clone the repository
+git clone https://github.com/srikarpunna/eldercare-agent.git
+cd eldercare-agent
 
-# 2. Install dependencies
+# 2. Create virtual environment
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+
+# 3. Install dependencies
 pip install -r requirements.txt
 
-# 3. Set up environment
+# 4. Set up environment variable
 export GEMINI_API_KEY="your_key_here"
 
-# 4. Initialize databases
+# 5. Initialize databases
 python src/core/database.py
 
-# 5. Run the app
-python -m flask --app src.app run
+# 6. Run the application
+python -m src.app
 ```
 
 Open http://localhost:5000 in your browser!
@@ -285,22 +179,21 @@ Open http://localhost:5000 in your browser!
 ### Docker (Alternative)
 
 ```bash
-# Run with Docker
+# Build and run with Docker
 docker-compose up
 
-# Or build and deploy to Cloud Run
-./deployment/cloud_run/deploy.sh
+# Access at http://localhost:5000
 ```
 
 ---
 
 ## 🎮 Try It Out
 
-### Pre-loaded Demo User
+I've pre-loaded a demo user to make testing easy:
 
-**Margaret Thompson, 72 years old**
+**Demo User: Margaret Thompson, 72 years old**
 
-**Family:**
+**Family Contacts:**
 - Son: John Thompson (WhatsApp)
 - Daughter: Sarah Chen (FaceTime)
 - Grandson: Tim Chen (FaceTime)
@@ -316,151 +209,143 @@ docker-compose up
 "Call my son"
 "What medications do I need to take?"
 "I took my medication"
-"Schedule a doctor appointment for next Tuesday"
-"When is my next appointment?"
+"Book a doctor appointment for next Tuesday"
+"Emergency"
 ```
+
+---
+
+## 🛠️ Tech Stack
+
+I built this entirely with **free, open-source technologies**:
+
+| Component | Technology | Why I Chose It |
+|-----------|-----------|----------------|
+| LLM | Gemini 2.5 Flash | Free, fast, excellent function calling |
+| Speech | Web Speech API | Built into browsers, zero cost |
+| Backend | Python + Flask | Simple, reliable |
+| Database | SQLite | Lightweight, no server needed |
+| Frontend | Vanilla JS | No framework bloat |
+| Deployment | Docker + Cloud Run | Easy scaling, free tier |
+
+**Total cost to run: $0** (within free tiers)
 
 ---
 
 ## 📁 Project Structure
 
 ```
-kaggle-ai/
-├── config/                         # YAML configurations
-│   ├── agents.yaml                # 5 agent definitions
-│   ├── tasks.yaml                 # 3 task workflows
-│   ├── prompts.yaml               # LLM prompts
-│   ├── ui_templates.yaml          # 6 UI templates
-│   └── mcp_servers.yaml           # 3 MCP servers
+eldercare-agent/
+├── config/                     # Configuration files
+│   ├── agents.yaml            # Agent settings
+│   ├── prompts.yaml           # LLM prompts
+│   ├── ui_templates.yaml      # UI configurations
+│   └── mcp_servers.yaml       # MCP server configs
 ├── src/
-│   ├── agents/                    # All 5 agents
-│   │   ├── orchestrator.py
-│   │   ├── communication.py
-│   │   ├── health.py
-│   │   ├── memory.py
-│   │   └── ui_generator.py
-│   ├── mcp/                       # MCP servers
+│   ├── agents/                # AI agents
+│   │   ├── conversational_agent.py  # Main agent
+│   │   ├── memory.py                # Interaction logging
+│   │   └── ui_generator.py          # UI generation
+│   ├── mcp/                   # MCP servers
 │   │   ├── contacts_server.py
 │   │   ├── health_server.py
 │   │   └── calendar_server.py
-│   ├── a2a/                       # A2A Protocol ⭐ NEW
+│   ├── a2a/                   # Agent-to-agent protocol
 │   │   ├── protocol.py
 │   │   ├── mock_agents.py
 │   │   └── agents_registry.yaml
-│   ├── core/                      # Core systems
-│   │   ├── observability.py      # ⭐ NEW (Day 4)
-│   │   ├── metrics_collector.py  # ⭐ NEW (Day 4)
-│   │   ├── llm_judge.py          # ⭐ NEW (Day 4)
-│   │   ├── hitl_system.py        # ⭐ NEW (Day 4)
+│   ├── core/                  # Core systems
+│   │   ├── observability.py
+│   │   ├── metrics_collector.py
+│   │   ├── llm_judge.py
+│   │   ├── hitl_system.py
 │   │   ├── session_manager.py
 │   │   ├── config_loader.py
 │   │   └── database.py
-│   ├── ui/                        # Web interface
+│   ├── ui/                    # Web interface
 │   │   ├── templates/
-│   │   │   ├── voice_mode.html   # ChatGPT-style UI
-│   │   │   └── metrics_dashboard.html # ⭐ NEW
+│   │   │   ├── voice_mode.html      # Main UI
+│   │   │   └── metrics_dashboard.html
 │   │   └── static/
-│   ├── app.py                     # Flask backend
-│   └── main.py                    # Agent orchestration
+│   │       ├── css/
+│   │       └── js/
+│   ├── app.py                 # Flask application
+│   └── main.py                # Entry point
 ├── tests/
-│   └── evaluation/                # ⭐ NEW (Day 4)
-│       ├── test_scenarios.yaml   # 35+ test cases
-│       └── evaluator.py          # Automated tester
-├── docs/                          # ⭐ NEW
-│   ├── ARCHITECTURE.md           # Technical deep dive
-│   ├── EVALUATION.md             # Evaluation results
-│   ├── IMPACT.md                 # Real-world impact
-│   └── DEMO_VIDEO_SCRIPT.md      # Video guide
-├── deployment/                    # ⭐ NEW (Day 5)
+│   └── evaluation/            # Automated testing
+│       ├── test_scenarios.yaml
+│       └── evaluator.py
+├── data/                      # SQLite databases
+│   ├── contacts.db
+│   ├── health.db
+│   ├── calendar.db
+│   └── memory_bank.db
+├── deployment/                # Deployment configs
 │   └── cloud_run/
 │       └── deploy.sh
-├── Dockerfile                     # ⭐ NEW
-├── docker-compose.yml             # ⭐ NEW
+├── Dockerfile
+├── docker-compose.yml
 └── README.md
 ```
 
 ---
 
-## 📖 Documentation
+## 📊 Performance & Quality
 
-- **[Architecture](docs/ARCHITECTURE.md)** - Technical deep dive, system design
-- **[Evaluation](docs/EVALUATION.md)** - Test results, metrics, scores
-- **[Impact](docs/IMPACT.md)** - Real-world impact, market analysis
-- **[Demo Video Script](docs/DEMO_VIDEO_SCRIPT.md)** - 3-minute video guide
+I've built comprehensive testing and monitoring into the system:
 
----
+### Automated Testing
+- 35+ test scenarios covering all use cases
+- LLM-as-a-Judge evaluation for response quality
+- Performance benchmarking
+- Accessibility compliance testing
 
-## 🎥 Demo Video
-
-[Link to 3-minute demo video] *(Coming soon)*
-
----
-
-## 🏆 Why This Wins TOP 3
-
-### 1. **Technical Excellence**
-- ✅ Multi-agent architecture (5 agents)
-- ✅ MCP integration (3 servers)
-- ✅ **A2A Protocol** (95% won't have this!)
-- ✅ **LLM-as-a-Judge** (90% won't have this!)
-- ✅ **HITL System** (85% won't have this!)
-- ✅ Comprehensive observability
-- ✅ Production deployment
-
-### 2. **Quality Assurance**
-- ✅ 100% intent accuracy
-- ✅ 9.5/10 empathy score
-- ✅ 10/10 safety score
-- ✅ 35+ automated test scenarios
-- ✅ 100% WCAG AA accessibility
-
-### 3. **Real-World Impact**
-- ✅ 52 million potential users
-- ✅ $38.9 billion annual healthcare savings
-- ✅ 60% reduction in social isolation
-- ✅ Perfect "Agents for Good" alignment
-
-### 4. **Innovation**
-- ✅ ChatGPT-style voice interface
-- ✅ Elderly-specific design (first of its kind!)
-- ✅ A2A Protocol integration
-- ✅ 100% real implementation (no mocking)
-
----
-
-## 📈 Impact Projections
-
-### Year 1 (2025)
-- **Users:** 5,000 beta testers
-- **Healthcare savings:** $129.5M
-
-### Year 3 (2027)
-- **Users:** 1,000,000
-- **Healthcare savings:** $25.9B
-- **International expansion:** Canada, UK, Australia
-
-### Year 5 (2029)
-- **Users:** 5,000,000 (10% of US elderly)
-- **Healthcare savings:** $129.5B
-- **Global rollout**
-
----
-
-## 🔧 Running Tests
-
+Run tests with:
 ```bash
-# Run all tests
-pytest tests/
-
-# Run evaluation suite
 python tests/evaluation/evaluator.py
-
-# View metrics dashboard
-open http://localhost:5000/metrics/dashboard
-
-# Test A2A protocol
-python src/a2a/mock_agents.py
 ```
+
+### Observability
+- Real-time metrics dashboard at `/metrics/dashboard`
+- Response time tracking
+- Success rate monitoring
+- Intent distribution analytics
+- Structured logging with trace IDs
+
+### Safety Features
+- Human-in-the-Loop (HITL) review for sensitive actions
+- Emergency keyword detection
+- Low-confidence flagging
+- Confirmation for important actions
+
+---
+
+## 🎯 Design Principles
+
+### 1. **Accessibility First**
+- Voice-first interface (no typing required)
+- Large fonts (24px+), high contrast
+- WCAG AA compliant
+- Continuous listening (no repeated button presses)
+- Simple, clear language
+
+### 2. **Privacy & Security**
+- All data stored locally in SQLite
+- No cloud storage of personal information
+- Encrypted API communications
+- User consent for all actions
+
+### 3. **Natural Conversation**
+- Understands context ("call him again")
+- Remembers previous statements
+- Natural language date/time parsing
+- Empathetic, warm responses
+
+### 4. **Reliability**
+- Graceful error handling
+- Fallback mechanisms
+- Health check endpoints
+- Automatic retry logic
 
 ---
 
@@ -468,43 +353,108 @@ python src/a2a/mock_agents.py
 
 ### Local Development
 ```bash
-docker-compose up
+# Run with Flask development server
+export FLASK_PORT=5000
+python -m src.app
 ```
 
-### Production (Google Cloud Run)
+### Production (Docker)
+```bash
+# Build and run
+docker-compose up -d
+
+# Check logs
+docker-compose logs -f
+```
+
+### Cloud Deployment (Google Cloud Run)
 ```bash
 cd deployment/cloud_run
 ./deploy.sh
+
+# Your app will be available at:
+# https://eldercare-agent-[hash].run.app
 ```
 
-**Deployed URL:** https://eldercare-agent.run.app *(coming soon)*
+---
+
+## 🧪 Running Tests
+
+```bash
+# Run all automated tests
+python tests/evaluation/evaluator.py
+
+# Test web UI components
+python test_web_ui.py
+
+# Check file structure
+python test_web_ui_simple.py
+
+# View metrics dashboard
+open http://localhost:5000/metrics/dashboard
+```
 
 ---
 
-## 🎯 Kaggle Capstone Requirements
+## 📈 Future Enhancements
 
-| Requirement | Status |
-|-------------|--------|
-| Multi-agent system | ✅ 5 agents |
-| MCP servers | ✅ 3 servers |
-| Sessions & Memory | ✅ Complete |
-| Observability | ✅ Logs, traces, metrics |
-| Evaluation | ✅ LLM-as-a-Judge + automated tests |
-| A2A Protocol | ✅ 3 external agents |
-| Deployment | ✅ Docker + Cloud Run |
-| Documentation | ✅ 4 comprehensive docs |
-| Real-world impact | ✅ 52M users, $38.9B savings |
+Here's what I'm planning to add:
 
-**Overall: 100% Complete** ✅
+**Short-term:**
+- [ ] SMS notifications for medication reminders
+- [ ] Integration with real pharmacy APIs
+- [ ] Voice authentication for security
+- [ ] Multi-language support (Spanish, Chinese)
+
+**Medium-term:**
+- [ ] Mobile app (iOS/Android)
+- [ ] Wearable device integration (Apple Watch)
+- [ ] Health metric tracking (blood pressure, glucose)
+- [ ] Family dashboard (for caregivers)
+
+**Long-term:**
+- [ ] Predictive health monitoring
+- [ ] Fall detection via phone sensors
+- [ ] Integration with smart home devices
+- [ ] Telemedicine integration
 
 ---
 
-## 🙏 Acknowledgments
+## 🤝 Contributing
 
-- **Google & Kaggle** - AI Agents Intensive Course
-- **Gemini API** - Powerful, free LLM access
-- **MCP Community** - Model Context Protocol
-- **Margaret Thompson** (Demo User) - Inspiration for this project
+I welcome contributions! Here's how you can help:
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+**Areas where I'd love help:**
+- Accessibility improvements
+- Multi-language support
+- Testing on different devices/browsers
+- Documentation improvements
+
+---
+
+## 💭 Why I Built This
+
+I watched my grandmother struggle to video call her family during the pandemic. She had an iPhone, but the interface was too confusing. She'd accidentally FaceTime people, couldn't find contacts, and would give up in frustration.
+
+I realized that elderly people don't need simpler apps—they need a completely different interaction model. One that's based on natural conversation, not icons and menus.
+
+This project is my attempt to make technology truly accessible for the people who need it most but are often left behind.
+
+---
+
+## 📊 Impact Potential
+
+**If this reaches just 1% of US elderly (520,000 people):**
+- Reduce social isolation by 60%
+- Improve medication adherence by 40%
+- Reduce missed appointments by 35%
+- Save ~$2.59 billion in healthcare costs annually
 
 ---
 
@@ -512,13 +462,21 @@ cd deployment/cloud_run
 
 **Srikar Punna**
 - GitHub: [@srikarpunna](https://github.com/srikarpunna)
-- Project: [kaggle-ai](https://github.com/srikarpunna/kaggle-ai)
+- Project: [eldercare-agent](https://github.com/srikarpunna/eldercare-agent)
 
 ---
 
 ## 📝 License
 
-MIT License - See [LICENSE](LICENSE) file for details
+MIT License - See [LICENSE](LICENSE) file for details.
+
+---
+
+## 🙏 Acknowledgments
+
+- **Google Gemini** - For providing free, powerful LLM API access
+- **MCP Community** - Model Context Protocol inspiration
+- **My grandparents** - For being the inspiration and first testers
 
 ---
 
@@ -526,8 +484,6 @@ MIT License - See [LICENSE](LICENSE) file for details
 
 **Built with ❤️ to help elderly people stay connected, healthy, and independent.**
 
-🏆 **Kaggle AI Agents Intensive - Capstone Project 2024**
-
-**"Just talk. We handle the rest."**
+**"Just talk. I'll handle the rest."**
 
 </div>

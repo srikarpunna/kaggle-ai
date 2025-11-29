@@ -150,7 +150,7 @@ class MetricsCollector:
 
         # Agent-specific metrics
         agent_metrics = {}
-        for agent in ['orchestrator', 'communication', 'health', 'memory', 'ui_generator']:
+        for agent in ['conversational_agent', 'memory', 'ui_generator']:
             agent_metrics[agent] = {
                 'calls': self.get_counter('agent_calls', {'agent': agent}),
                 'avg_duration_ms': self.get_histogram_stats('agent_duration_ms', {'agent': agent}).get('avg', 0),

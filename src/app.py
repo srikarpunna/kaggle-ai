@@ -5,6 +5,7 @@ Provides web interface for the ElderCare Agent system.
 
 import os
 import logging
+from datetime import datetime
 from flask import Flask, render_template, request, jsonify, session
 from flask_cors import CORS
 from dotenv import load_dotenv
@@ -64,6 +65,21 @@ def classic():
     return render_template('index.html')
 
 
+@app.route('/metrics/dashboard')
+def metrics_dashboard():
+    """Metrics dashboard."""
+    from .core.metrics_collector import get_dashboard_data
+    
+    # Get current metrics
+    dashboard_data = get_dashboard_data()
+    
+    return jsonify({
+        'status': 'ok',
+        'data': dashboard_data,
+        'timestamp': datetime.now().isoformat()
+    })
+
+
 @app.route('/api/message', methods=['POST'])
 async def process_message():
     """
@@ -86,7 +102,15 @@ async def process_message():
     try:
         data = request.get_json()
         user_message = data.get('message', '').strip()
-        user_id = data.get('user_id', 'margaret_thompson')
+        
+        # Try to get user_id from session profile first
+        profile = session.get('user_profile')
+        if profile and profile.get('name'):
+            # Create user_id from profile name (lowercase, replace spaces with underscore)
+            user_id = profile['name'].lower().replace(' ', '_')
+        else:
+            # Default to a generic user ID if no profile
+            user_id = data.get('user_id', 'user_default')
 
         if not user_message:
             return jsonify({
@@ -94,7 +118,7 @@ async def process_message():
                 'error': 'No message provided'
             }), 400
 
-        logger.info(f"Processing message: {user_message}")
+        logger.info(f"Processing message from {user_id}: {user_message}")
 
         # Get or create agent
         agent = get_or_create_agent(user_id)
@@ -106,6 +130,7 @@ async def process_message():
         if os.getenv('FLASK_DEBUG', 'False').lower() == 'true':
             response['_debug'] = {
                 'user_message': user_message,
+                'user_id': user_id,
                 'response_keys': list(response.keys())
             }
 

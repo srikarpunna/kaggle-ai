@@ -1,32 +1,63 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ElderCare Agent - Voice Assistant</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/voice_mode.css') }}">
+
+    <!-- Google Fonts - Premium Typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/voice_mode_premium.css') }}">
 </head>
+
 <body>
     <!-- Main Voice Interface Container -->
     <div id="voice-interface">
 
-        <!-- Animated Circle Visualizer -->
+        <!-- Animated Circle Visualizer with Gradients -->
         <div id="circle-container">
-            <svg id="audio-visualizer" width="300" height="300" viewBox="0 0 300 300">
+            <svg id="audio-visualizer" width="320" height="320" viewBox="0 0 320 320">
+                <!-- Gradient Definitions -->
+                <defs>
+                    <linearGradient id="gradient-idle" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" style="stop-color:#607D8B;stop-opacity:1" />
+                        <stop offset="100%" style="stop-color:#78909C;stop-opacity:1" />
+                    </linearGradient>
+
+                    <linearGradient id="gradient-listening" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" style="stop-color:#1E88E5;stop-opacity:1" />
+                        <stop offset="100%" style="stop-color:#42A5F5;stop-opacity:1" />
+                    </linearGradient>
+
+                    <linearGradient id="gradient-speaking" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" style="stop-color:#26C6DA;stop-opacity:1" />
+                        <stop offset="100%" style="stop-color:#00BFA5;stop-opacity:1" />
+                    </linearGradient>
+
+                    <linearGradient id="gradient-thinking" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" style="stop-color:#66BB6A;stop-opacity:1" />
+                        <stop offset="100%" style="stop-color:#4CAF50;stop-opacity:1" />
+                    </linearGradient>
+                </defs>
+
                 <!-- Background circle -->
-                <circle id="bg-circle" cx="150" cy="150" r="140"
-                        fill="none" stroke="#333" stroke-width="2" opacity="0.3"/>
+                <circle id="bg-circle" cx="160" cy="160" r="150" fill="none" stroke="rgba(255,255,255,0.1)"
+                    stroke-width="2" />
 
                 <!-- Frequency bars (40 bars around the circle) -->
                 <g id="frequency-bars"></g>
 
                 <!-- Main circle -->
-                <circle id="main-circle" cx="150" cy="150" r="120"
-                        fill="#1a1a1a" stroke="#4CAF50" stroke-width="3"/>
+                <circle id="main-circle" class="idle" cx="160" cy="160" r="120" fill="rgba(10, 14, 39, 0.8)"
+                    stroke="url(#gradient-idle)" stroke-width="4" />
 
                 <!-- Pulse effect circle -->
-                <circle id="pulse-circle" cx="150" cy="150" r="120"
-                        fill="none" stroke="#4CAF50" stroke-width="2" opacity="0"/>
+                <circle id="pulse-circle" cx="160" cy="160" r="120" fill="none" stroke="url(#gradient-listening)"
+                    stroke-width="2" opacity="0" />
             </svg>
         </div>
 
@@ -56,13 +87,12 @@
     <div id="onboarding-overlay" class="hidden">
         <div id="onboarding-circle-container">
             <svg id="onboarding-visualizer" width="300" height="300" viewBox="0 0 300 300">
-                <circle cx="150" cy="150" r="140"
-                        fill="none" stroke="#333" stroke-width="2" opacity="0.3"/>
+                <circle cx="150" cy="150" r="140" fill="none" stroke="#333" stroke-width="2" opacity="0.3" />
                 <g id="onboarding-bars"></g>
-                <circle id="onboarding-main-circle" cx="150" cy="150" r="120"
-                        fill="#1a1a1a" stroke="#2196F3" stroke-width="3"/>
-                <circle id="onboarding-pulse" cx="150" cy="150" r="120"
-                        fill="none" stroke="#2196F3" stroke-width="2" opacity="0"/>
+                <circle id="onboarding-main-circle" cx="150" cy="150" r="120" fill="#1a1a1a" stroke="#2196F3"
+                    stroke-width="3" />
+                <circle id="onboarding-pulse" cx="150" cy="150" r="120" fill="none" stroke="#2196F3" stroke-width="2"
+                    opacity="0" />
             </svg>
         </div>
         <div id="onboarding-message" class="onboarding-text"></div>
@@ -90,4 +120,5 @@
     <script src="{{ url_for('static', filename='js/voice_mode.js') }}"></script>
     <!-- VoiceModeUI auto-initializes in voice_mode.js -->
 </body>
+
 </html>

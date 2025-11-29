@@ -162,7 +162,15 @@ class VoiceModeUI {
             this.state.isRecording = false;
             this.elements.micButton.classList.remove('listening');
 
-            if (event.error !== 'no-speech') {
+            // Only restart on no-speech if we're in idle mode waiting for user
+            // Don't restart if we're processing or just spoke to the user
+            if (event.error === 'no-speech' && 
+                this.state.onboardingComplete && 
+                this.state.mode === 'idle') {
+                console.log('No speech detected, will wait for auto-restart...');
+                // Don't restart immediately - let the normal auto-restart handle it
+                // This prevents a restart loop
+            } else if (event.error !== 'no-speech') {
                 this.showToast(`Error: ${event.error}`, 'error');
             }
         };
@@ -204,19 +212,19 @@ class VoiceModeUI {
     async waitForUserInteraction() {
         return new Promise((resolve) => {
             const startBtn = document.getElementById('start-voice-btn');
-            
+
             // Show the button
             if (startBtn) {
                 startBtn.style.display = 'block';
-                
+
                 startBtn.onclick = () => {
                     console.log('User clicked to enable voice');
                     startBtn.style.display = 'none';
-                    
+
                     // Play a silent sound to initialize audio context
                     const utterance = new SpeechSynthesisUtterance('');
                     this.synthesis.speak(utterance);
-                    
+
                     resolve();
                 };
             } else {
@@ -241,14 +249,29 @@ class VoiceModeUI {
 
         // Step 1: Ask for name
         await this.sleep(1000);
-        await this.speakOnboarding("Hello! I'm your ElderCare assistant. What's your name?");
+        await this.speakOnboarding("Hello! What's your name?");
 
         // Listen for name
-        const name = await this.listenOnboarding();
-        if (!name) {
+        console.log('⏳ Waiting for name response...');
+        let nameResponse = await this.listenOnboarding();
+        console.log('Got name response:', nameResponse);
+        if (!nameResponse) {
             await this.startOnboarding(); // Retry
             return;
         }
+        
+        // Extract actual name from responses like "My name is John" or "I'm John" or just "John"
+        let name = nameResponse;
+        if (nameResponse.toLowerCase().includes('my name is')) {
+            name = nameResponse.toLowerCase().replace('my name is', '').trim();
+        } else if (nameResponse.toLowerCase().includes("i'm")) {
+            name = nameResponse.toLowerCase().replace("i'm", '').replace('i am', '').trim();
+        } else if (nameResponse.toLowerCase().includes('i am')) {
+            name = nameResponse.toLowerCase().replace('i am', '').trim();
+        }
+        
+        // Capitalize first letter of each word
+        name = name.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
         this.state.userName = name;
 
         // Step 2: Ask for age
@@ -274,9 +297,9 @@ class VoiceModeUI {
         }
         this.state.userAge = age;
 
-        // Step 3: Welcome message
+        // Step 3: Simple welcome - don't list features
         await this.sleep(500);
-        await this.speakOnboarding(`Thank you, ${name}! I'm here to help you with calls, medications, and appointments. Just say what you need!`);
+        await this.speakOnboarding(`Thank you, ${name}! I'm ready to help. What would you like to do?`);
 
         // Save profile to session
         await this.saveProfile(name, age);
@@ -287,6 +310,12 @@ class VoiceModeUI {
         setTimeout(() => {
             this.elements.onboardingOverlay.classList.add('hidden');
             this.state.onboardingComplete = true;
+            
+            // Start listening for user's first request after onboarding
+            setTimeout(() => {
+                console.log('Starting listening after onboarding...');
+                this.startRecording();
+            }, 1000);
         }, 500);
     }
 
@@ -343,6 +372,8 @@ class VoiceModeUI {
 
     async listenOnboarding() {
         return new Promise((resolve) => {
+            console.log('👂 Starting to listen for user response...');
+            
             // Clear message
             this.elements.onboardingMessage.textContent = '';
 
@@ -355,22 +386,35 @@ class VoiceModeUI {
             recognition.interimResults = false;
             recognition.lang = 'en-US';
 
+            recognition.onstart = () => {
+                console.log('✅ Speech recognition started, say your answer now...');
+            };
+
             recognition.onresult = (event) => {
                 const transcript = event.results[0][0].transcript;
+                console.log('📝 Heard:', transcript);
                 this.elements.onboardingCircle.classList.remove('listening');
                 resolve(transcript.trim());
             };
 
-            recognition.onerror = () => {
+            recognition.onerror = (event) => {
+                console.error('❌ Speech recognition error:', event.error);
                 this.elements.onboardingCircle.classList.remove('listening');
                 resolve(null);
             };
 
             recognition.onend = () => {
+                console.log('🛑 Speech recognition ended');
                 this.elements.onboardingCircle.classList.remove('listening');
             };
 
-            recognition.start();
+            try {
+                recognition.start();
+                console.log('🎤 Recognition.start() called');
+            } catch (error) {
+                console.error('❌ Failed to start recognition:', error);
+                resolve(null);
+            }
         });
     }
 
@@ -576,20 +620,39 @@ class VoiceModeUI {
                 body: JSON.stringify({ message })
             });
 
-            const data = await response.json();
-            console.log('Response from agent:', data);
+            // Check if response is OK
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error('HTTP error:', response.status, errorText);
+                throw new Error(`Server error: ${response.status}`);
+            }
 
-            if (!data.success) {
-                throw new Error(data.error || 'Unknown error');
+            const data = await response.json();
+            console.log('Full response from agent:', data);
+
+            // Check for actual errors (not just unclear intent)
+            // If there's a message, it's a valid response even if success is false
+            if (data.success === false && !data.message) {
+                const errorMsg = data.error || 'Unknown error';
+                console.error('Agent returned error:', errorMsg);
+                throw new Error(errorMsg);
             }
 
             // Display agent response
             this.setMode('speaking');
             this.elements.statusText.textContent = '';
-            await this.displayAgentMessage(data.message);
+
+            // Make sure we have a message to display
+            const agentMessage = data.message || 'I heard you, but I\'m not sure how to respond.';
+            await this.displayAgentMessage(agentMessage);
 
             // Speak the response
-            await this.speak(data.message);
+            try {
+                await this.speak(agentMessage);
+            } catch (speechError) {
+                console.error('Text-to-speech error:', speechError);
+                // Continue even if speech fails
+            }
 
             // Show UI if present
             if (data.ui) {
@@ -598,12 +661,33 @@ class VoiceModeUI {
 
             // Return to idle
             this.setMode('idle');
+            
+            // Auto-restart listening for continuous conversation (grandma doesn't need to press button again)
+            // Wait longer for the agent to finish speaking and user to process
+            setTimeout(() => {
+                if (this.state.onboardingComplete && !this.state.isRecording) {
+                    console.log('Auto-restarting listening for continuous conversation...');
+                    this.startRecording();
+                }
+            }, 2500); // Wait 2.5 seconds to ensure speech finishes and user has time to respond
 
         } catch (error) {
             console.error('Error processing message:', error);
+            console.error('Error details:', {
+                message: error.message,
+                stack: error.stack
+            });
+
             this.setMode('idle');
             this.elements.statusText.textContent = '';
-            this.showToast('Sorry, something went wrong. Please try again.', 'error');
+
+            // Show more helpful error message
+            const errorMsg = error.message || 'Unknown error occurred';
+            this.showToast(`Error: ${errorMsg}. Please try again.`, 'error');
+
+            // Also display error in agent message area
+            this.elements.agentMessage.textContent = `Sorry, I encountered an error: ${errorMsg}`;
+            this.elements.agentMessage.classList.add('visible');
         }
     }
 
@@ -651,7 +735,9 @@ class VoiceModeUI {
     renderUIContent(uiConfig) {
         const templateId = uiConfig.template_id;
 
-        if (templateId === 'call_ui') {
+        if (templateId === 'emergency_ui') {
+            this.renderEmergencyUI(uiConfig);
+        } else if (templateId === 'call_ui') {
             this.renderCallUI(uiConfig);
         } else if (templateId === 'medication_card') {
             this.renderMedicationUI(uiConfig);
@@ -664,17 +750,63 @@ class VoiceModeUI {
     }
 
     renderCallUI(uiConfig) {
-        const elements = uiConfig.ui_config.elements;
-        const contactName = elements.find(e => e.id === 'contact_name')?.content || 'Contact';
-        const relationship = elements.find(e => e.id === 'relationship')?.content || '';
-        const callButton = elements.find(e => e.id === 'call_button');
+        const config = uiConfig.ui_config;
+        
+        // Handle both old format (elements array) and new format (direct properties)
+        let contactName, relationship, phone, callUrl;
+        
+        if (config.elements) {
+            // Old format with elements array
+            contactName = config.elements.find(e => e.id === 'contact_name')?.content || 'Contact';
+            relationship = config.elements.find(e => e.id === 'relationship')?.content || '';
+            const callButton = config.elements.find(e => e.id === 'call_button');
+            callUrl = callButton?.url || '#';
+        } else {
+            // New simpler format
+            contactName = config.contact_name || 'Contact';
+            relationship = config.relationship || '';
+            phone = config.phone || '';
+            // Create WhatsApp call URL
+            callUrl = phone ? `https://wa.me/${phone.replace(/[^0-9]/g, '')}` : '#';
+        }
+
+        const relText = relationship ? `(${relationship})` : '';
 
         this.elements.uiContent.innerHTML = `
-            <h2>📞 ${contactName}</h2>
-            <p style="font-size: 22px; color: #666; margin-bottom: 30px;">${relationship}</p>
-            <button onclick="window.open('${callButton.url}', '_blank')" style="font-size: 32px;">
-                Start Video Call
-            </button>
+            <div style="text-align: center; padding: 30px;">
+                <h2 style="font-size: 36px; margin-bottom: 10px;">📞 ${contactName}</h2>
+                <p style="font-size: 24px; color: #666; margin-bottom: 10px;">${relText}</p>
+                ${phone ? `<p style="font-size: 20px; color: #888; margin-bottom: 30px;">${phone}</p>` : ''}
+                <button onclick="window.open('${callUrl}', '_blank')" 
+                        style="font-size: 28px; padding: 20px 40px; background: #25D366; color: white; border: none; border-radius: 15px; cursor: pointer;">
+                    📱 Start Video Call
+                </button>
+            </div>
+        `;
+    }
+
+    renderEmergencyUI(uiConfig) {
+        const config = uiConfig.ui_config;
+        const situation = config.situation || 'Emergency';
+        const emergencyNumber = config.emergency_number || '911';
+        
+        this.elements.uiContent.innerHTML = `
+            <div style="text-align: center; padding: 40px; background: #ff0000; color: white; border-radius: 20px;">
+                <h1 style="font-size: 60px; margin-bottom: 20px; animation: pulse 1s infinite;">🚨</h1>
+                <h2 style="font-size: 42px; margin-bottom: 20px;">CALLING ${emergencyNumber}</h2>
+                <p style="font-size: 28px; margin-bottom: 30px;">${situation}</p>
+                <button onclick="window.location.href='tel:${emergencyNumber}'" 
+                        style="font-size: 36px; padding: 25px 50px; background: white; color: red; border: none; border-radius: 15px; cursor: pointer; font-weight: bold; animation: pulse 1s infinite;">
+                    📞 CALL NOW
+                </button>
+                <p style="font-size: 20px; margin-top: 30px;">Help is on the way. Stay calm.</p>
+            </div>
+            <style>
+                @keyframes pulse {
+                    0%, 100% { transform: scale(1); }
+                    50% { transform: scale(1.1); }
+                }
+            </style>
         `;
     }
 

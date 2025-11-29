@@ -99,7 +99,8 @@ class AgentEvaluator:
         user_context = scenario.get('user_context', {})
 
         # Create agent instance
-        agent = ElderCareAgent()
+        user_id = user_context.get('user_id', 'margaret_thompson') if user_context else 'margaret_thompson'
+        agent = ElderCareAgent(user_id=user_id)
 
         # Set user context if provided
         if user_context:

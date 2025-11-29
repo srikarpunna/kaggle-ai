@@ -260,12 +260,17 @@ class Database:
         logger.info("Memory database initialized")
 
     def seed_demo_data(self, user_id: str = "margaret_thompson"):
-        """Seed demo data for Margaret Thompson."""
+        """Seed demo data for Margaret Thompson and other common users."""
         logger.info(f"Seeding demo data for user: {user_id}")
 
         self._seed_contacts(user_id)
         self._seed_medications(user_id)
         self._seed_doctors()
+        
+        # Also seed for common web session user IDs
+        if user_id != "alex":
+            self._seed_contacts("alex")
+            self._seed_medications("alex")
 
         logger.info("Demo data seeded successfully")
 
@@ -355,6 +360,16 @@ class Database:
             },
             {
                 "user_id": user_id,
+                "medication_name": "Metformin",
+                "dosage": "500 mg",
+                "frequency": "twice_daily",
+                "times": json.dumps(["08:00", "18:00"]),
+                "instructions": "Take with meals. For blood sugar control.",
+                "image_url": "/images/medications/metformin.png",
+                "active": 1
+            },
+            {
+                "user_id": user_id,
                 "medication_name": "Aspirin",
                 "dosage": "81 mg",
                 "frequency": "once_daily",
@@ -426,6 +441,57 @@ class Database:
         conn.commit()
         conn.close()
         logger.info(f"Seeded {len(doctors)} doctors")
+
+    def get_contacts(self, user_id: str) -> list:
+        """Get all contacts for a user."""
+        conn = sqlite3.connect(self.contacts_db)
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+        
+        cursor.execute("""
+            SELECT contact_name, phone, email, relationship, preferred_platform, notes
+            FROM contacts WHERE user_id = ?
+        """, (user_id,))
+        
+        contacts = [dict(row) for row in cursor.fetchall()]
+        conn.close()
+        return contacts
+    
+    def find_contact_by_relationship(self, user_id: str, relationship: str) -> dict:
+        """Find a contact by relationship (son, daughter, doctor, etc.)."""
+        conn = sqlite3.connect(self.contacts_db)
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+        
+        cursor.execute("""
+            SELECT contact_name, phone, email, relationship, preferred_platform, notes
+            FROM contacts WHERE user_id = ? AND LOWER(relationship) = LOWER(?)
+        """, (user_id, relationship))
+        
+        row = cursor.fetchone()
+        conn.close()
+        
+        if row:
+            return dict(row)
+        return None
+    
+    def find_contact_by_name(self, user_id: str, name: str) -> dict:
+        """Find a contact by name (partial match)."""
+        conn = sqlite3.connect(self.contacts_db)
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+        
+        cursor.execute("""
+            SELECT contact_name, phone, email, relationship, preferred_platform, notes
+            FROM contacts WHERE user_id = ? AND LOWER(contact_name) LIKE LOWER(?)
+        """, (user_id, f"%{name}%"))
+        
+        row = cursor.fetchone()
+        conn.close()
+        
+        if row:
+            return dict(row)
+        return None
 
     def get_connection(self, db_name: str) -> sqlite3.Connection:
         """Get a connection to a specific database."""
