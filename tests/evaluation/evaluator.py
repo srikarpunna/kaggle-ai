@@ -66,12 +66,17 @@ class AgentEvaluator:
 
         start_time = time.time()
 
-        # Run each scenario
+        # Run each scenario (rate limited: 2 calls/min = 30s between calls)
         for i, scenario in enumerate(self.scenarios, 1):
             print(f"[{i}/{len(self.scenarios)}] Running: {scenario['name']}...")
 
             result = await self.run_scenario(scenario)
             self.results.append(result)
+            
+            # Rate limit: wait 30s between scenarios (2 calls per minute)
+            if i < len(self.scenarios):
+                print(f"  ⏳ Rate limiting: waiting 30s...")
+                await asyncio.sleep(30)
 
             # Print quick result
             status = "✅ PASS" if result['passed'] else "❌ FAIL"
