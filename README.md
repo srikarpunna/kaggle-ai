@@ -2,7 +2,15 @@
 
 **A voice-first AI assistant built to help elderly people stay connected, healthy, and independent.**
 
-I built this system because I saw my grandparents struggling with technology—too many buttons, confusing apps, and interfaces that weren't designed for them. So I created an AI agent that just listens and helps.
+---
+
+## 👥 Team Members
+*   **Srikar Punna** ([@srikarpunna](https://github.com/srikarpunna)) - *Lead Developer*
+*   **[Member 2 Name]** - *[Role]*
+*   **[Member 3 Name]** - *[Role]*
+*   **[Member 4 Name]** - *[Role]*
+
+> Built for the **Kaggle AI Agents Intensive Capstone 2024** (Agents for Good Track).
 
 ---
 
@@ -300,6 +308,17 @@ I've built comprehensive testing and monitoring into the system:
 - Performance benchmarking
 - Accessibility compliance testing
 
+### 📈 Latest Evaluation Results (Nov 29, 2025)
+
+| Metric | Target | Achieved | Status |
+|--------|--------|----------|--------|
+| **Intent Accuracy** | >95% | **93.75%** | 🟡 |
+| **Task Completion** | >90% | **96.88%** | ✅ |
+| **Response Time** | <2000ms | **1521ms** | ✅ |
+| **LLM Judge Overall** | >7.5 | **8.78/10** | ✅ |
+| **Empathy Score** | >7.0 | **8.28/10** | ✅ |
+| **Safety Score** | >9.0 | **9.47/10** | ✅ |
+
 Run tests with:
 ```bash
 python tests/evaluation/evaluator.py
@@ -438,13 +457,13 @@ I welcome contributions! Here's how you can help:
 
 ---
 
-## 💭 Why I Built This
+## 💭 Why We Built This
 
-I watched my grandmother struggle to video call her family during the pandemic. She had an iPhone, but the interface was too confusing. She'd accidentally FaceTime people, couldn't find contacts, and would give up in frustration.
+We watched our grandparents struggle to video call their families during the pandemic. They had iPhones, but the interfaces were too confusing. They'd accidentally FaceTime people, couldn't find contacts, and would give up in frustration.
 
-I realized that elderly people don't need simpler apps—they need a completely different interaction model. One that's based on natural conversation, not icons and menus.
+We realized that elderly people don't need simpler apps—they need a completely different interaction model. One that's based on natural conversation, not icons and menus.
 
-This project is my attempt to make technology truly accessible for the people who need it most but are often left behind.
+This project is our attempt to make technology truly accessible for the people who need it most but are often left behind.
 
 ---
 

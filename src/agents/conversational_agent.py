@@ -32,6 +32,16 @@ class ConversationalAgent:
         self.user_profile = user_profile
         self.db_manager = db_manager
         
+        # Auto-seed data for new users if they have no contacts
+        if self.db_manager:
+            try:
+                contacts = self.db_manager.get_contacts(self.user_id)
+                if not contacts:
+                    logger.info(f"No contacts found for new user {user_id}. Seeding demo data.")
+                    self.db_manager.seed_demo_data(self.user_id)
+            except Exception as e:
+                logger.warning(f"Failed to check/seed contacts: {e}")
+        
         # Initialize Gemini with 2.5 Flash model
         self.model = genai.GenerativeModel('gemini-2.5-flash')
         
@@ -372,7 +382,8 @@ Keep your response conversational and brief (1-2 sentences).
                         
                         task_type = result.get("task_type", "general")
                         if task_type:
-                            metrics_collector.record_intent(task_type.upper())
+                            intent = self._task_to_intent(task_type)
+                            metrics_collector.record_intent(intent)
                         
                         return result
                         
@@ -404,7 +415,8 @@ Keep your response conversational and brief (1-2 sentences).
                         metrics_collector.record_success()
                         
                         if task_type:
-                            metrics_collector.record_intent(task_type.upper())
+                            intent = self._task_to_intent(task_type)
+                            metrics_collector.record_intent(intent)
                         
                         return result
             
@@ -490,6 +502,14 @@ Keep your response conversational and brief (1-2 sentences).
                 }
                 logger.info("Started video call task")
                 metrics_collector.record_task(started=True)
+
+        # Detect explicit answers to "Who would you like to call?"
+        # If we are in a 'video_call' task but status is collecting, and message is short
+        elif self.task_state.get("current_task") == "video_call" and len(user_message.split()) < 5:
+             # Assume this is a name provided in response to a question
+             logger.info(f"Assuming '{user_message}' is a contact name for existing call task")
+             # We don't need to change state, just let the LLM/Function handle it
+
         
         # Detect medication task
         elif any(word in msg_lower for word in ['medication', 'medicine', 'pill', 'drug', 'prescription']):
@@ -647,11 +667,19 @@ Keep your response conversational and brief (1-2 sentences).
             try:
                 # First try to find by relationship (son, daughter, doctor, etc.)
                 relationship_words = ["son", "daughter", "grandson", "granddaughter", "doctor", "wife", "husband", "brother", "sister", "mom", "dad", "mother", "father"]
-                for rel in relationship_words:
-                    if rel in contact_name.lower():
-                        contact_info = self.db_manager.find_contact_by_relationship(self.user_id, rel)
-                        if contact_info:
-                            break
+                
+                # Check if the contact_name itself IS a relationship word (e.g. "my son")
+                cleaned_name = contact_name.lower().replace("my ", "").strip()
+                
+                if cleaned_name in relationship_words:
+                     contact_info = self.db_manager.find_contact_by_relationship(self.user_id, cleaned_name)
+                
+                if not contact_info:
+                    for rel in relationship_words:
+                        if rel in contact_name.lower():
+                            contact_info = self.db_manager.find_contact_by_relationship(self.user_id, rel)
+                            if contact_info:
+                                break
                 
                 # If not found by relationship, try by name
                 if not contact_info:

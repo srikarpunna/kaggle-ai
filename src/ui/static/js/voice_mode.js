@@ -162,15 +162,20 @@ class VoiceModeUI {
             this.state.isRecording = false;
             this.elements.micButton.classList.remove('listening');
 
-            // Only restart on no-speech if we're in idle mode waiting for user
-            // Don't restart if we're processing or just spoke to the user
-            if (event.error === 'no-speech' && 
-                this.state.onboardingComplete && 
-                this.state.mode === 'idle') {
-                console.log('No speech detected, will wait for auto-restart...');
-                // Don't restart immediately - let the normal auto-restart handle it
-                // This prevents a restart loop
-            } else if (event.error !== 'no-speech') {
+            // FORCE RESTART on 'no-speech' (silence) or 'network' errors
+            // This creates the "Always On" experience
+            if (event.error === 'no-speech' || event.error === 'network') {
+                console.log('Silence detected (no-speech), automatically restarting...');
+                if (this.state.onboardingComplete && this.state.mode === 'idle') {
+                    // Small delay to prevent CPU spinning, but fast enough to feel continuous
+                    setTimeout(() => {
+                        this.startRecording();
+                    }, 100);
+                    return;
+                }
+            }
+
+            if (event.error !== 'no-speech') {
                 this.showToast(`Error: ${event.error}`, 'error');
             }
         };
@@ -180,6 +185,15 @@ class VoiceModeUI {
             this.setMode('idle');
             this.state.isRecording = false;
             this.elements.micButton.classList.remove('listening');
+            
+            // AUTO-RESTART LOOP
+            // Unless the user explicitly stopped it (we don't have a stop button logic here, so assume always on)
+            if (this.state.onboardingComplete && this.state.mode === 'idle') {
+                console.log('Microphone disconnected, restarting loop...');
+                setTimeout(() => {
+                    this.startRecording();
+                }, 200);
+            }
         };
     }
 

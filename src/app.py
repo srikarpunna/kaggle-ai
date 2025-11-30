@@ -59,15 +59,15 @@ def index():
     """Main page - Voice Mode Interface."""
     return render_template('voice_mode.html')
 
-@app.route('/classic')
-def classic():
-    """Classic UI (for reference/testing)."""
-    return render_template('index.html')
-
 
 @app.route('/metrics/dashboard')
 def metrics_dashboard():
-    """Metrics dashboard."""
+    """Metrics dashboard UI."""
+    return render_template('metrics_dashboard.html')
+
+@app.route('/api/metrics')
+def get_metrics_data():
+    """Get metrics data for dashboard."""
     from .core.metrics_collector import get_dashboard_data
     
     # Get current metrics
